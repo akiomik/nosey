@@ -17,11 +17,9 @@
   }
 </script>
 
-<h1>nosquawks</h1>
-
 <form on:submit={handleSearch}>
   <input bind:value={query} />
-  <button type="submit">Search</button>
+  <button type="submit" class="btn variant-filled-primary">Search</button>
 </form>
 
 {#if data.result}

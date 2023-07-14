@@ -7,6 +7,6 @@ export async function load({ url }: RequestEvent) {
     return;
   }
 
-  const result = await search({ query: q, kind: 1, limit: 100 });
+  const result = await search({ query: q, kind: 1, limit: 100, sort: 'time' });
   return { q, result };
 }
