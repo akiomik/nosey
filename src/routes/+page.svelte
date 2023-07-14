@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import type { PageData } from '$lib/types';
-  import SearchResultNoteList from '$lib/components/SearchResultNoteList.svelte';
+  import NoteList from '$lib/components/NoteList.svelte';
 
   export let data: PageData;
 
@@ -23,5 +23,5 @@
 </form>
 
 {#if data.result}
-  <SearchResultNoteList result={data.result} />
+  <NoteList notes={data.result.data} />
 {/if}
