@@ -1,2 +1,29 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+  import { goto } from '$app/navigation';
+  import type { PageData } from '$lib/types';
+  import SearchResultNoteList from '$lib/components/SearchResultNoteList.svelte';
+
+  export let data: PageData;
+
+  let query = data.q;
+
+  const handleSearch = (e: SubmitEvent) => {
+    e.preventDefault();
+    goto(`/?${new URLSearchParams({ q: query })}`);
+  };
+
+  $: {
+    console.debug('data', data);
+  }
+</script>
+
+<h1>nosquawks</h1>
+
+<form on:submit={handleSearch}>
+  <input bind:value={query} />
+  <button type="submit">Search</button>
+</form>
+
+{#if data.result}
+  <SearchResultNoteList result={data.result} />
+{/if}
