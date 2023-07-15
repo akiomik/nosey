@@ -2,4 +2,6 @@
   import { AppBar } from '@skeletonlabs/skeleton';
 </script>
 
-<AppBar>nosquawks</AppBar>
+<AppBar>
+  <a href="/">nosquawks</a>
+</AppBar>

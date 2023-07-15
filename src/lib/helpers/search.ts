@@ -1,4 +1,5 @@
 import type { SearchQuery, SearchResult, Encoded } from '$lib/types';
+import { HttpBadRequestError, HttpBadGatewayError } from '$lib/errors';
 
 function encode(query: Partial<SearchQuery>): Encoded<Partial<SearchQuery>> {
   const entries = Object.entries(query)
@@ -33,8 +34,11 @@ export async function search(query: Partial<SearchQuery>): Promise<SearchResult>
   const data = await res.json();
 
   if (!res.ok) {
-    // TODO: Improve error message
-    throw new Error(JSON.stringify(data.error));
+    if (res.status < 500) {
+      throw new HttpBadRequestError(JSON.stringify(data.error));
+    } else {
+      throw new HttpBadGatewayError(JSON.stringify(data.error));
+    }
   }
 
   return data;
