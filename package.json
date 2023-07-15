@@ -43,6 +43,7 @@
     "linkify-html": "^4.1.1",
     "linkifyjs": "^4.1.1",
     "nostr-tools": "^1.12.1",
+    "tributejs": "^5.1.3",
     "url-regex-safe": "^3.0.0"
   }
 }
