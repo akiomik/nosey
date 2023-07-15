@@ -65,6 +65,7 @@
 
           const req = createRxOneshotReq({ filters: [{ kinds: [0], search: text, limit: 25 }] });
 
+          // TODO: select the latest metadata by each pubkey
           rxNostr
             .use(req)
             .pipe(
