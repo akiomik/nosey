@@ -31,6 +31,7 @@ export type Encoded<A extends object> = {
 
 export type PageData = {
   q: string;
+  page: number;
   result: SearchResult;
 };
 
