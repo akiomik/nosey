@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { Paginator } from '@skeletonlabs/skeleton';
   import { createRxNostr, createRxOneshotReq } from 'rx-nostr';
   import { map, toArray } from 'rxjs';
@@ -28,6 +30,7 @@
     goto(`/?${new URLSearchParams({ q: query, page: e.detail })}`);
   };
 
+  $: isInitial = data.q == null;
   $: {
     console.debug('data', data);
   }
@@ -91,10 +94,21 @@
   });
 </script>
 
-<form on:submit={handleSearch} class="relative" bind:this={form}>
+<form
+  on:submit={handleSearch}
+  class="flex flex-col gap-8 relative justify-center items-center"
+  class:h-full={isInitial}
+  bind:this={form}
+>
+  {#if isInitial}
+    <h1 class="h1">nosquawks</h1>
+  {/if}
+
   <div class="input-group input-group-divider grid-cols-[1fr_auto]">
     <input type="search" bind:this={input} bind:value={query} />
-    <button type="submit" class="variant-filled-primary">Search</button>
+    <button type="submit" class="variant-filled-primary">
+      <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
+    </button>
   </div>
 </form>
 
