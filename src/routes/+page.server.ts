@@ -5,7 +5,7 @@ import { parseQuery } from '$lib/helpers/parseQuery';
 import { HttpBadRequestError, HttpBadGatewayError } from '$lib/errors';
 
 export async function load({ url }: RequestEvent) {
-  const q = url.searchParams.get('q');
+  const q = url.searchParams.get('q')?.trim();
   if (!q) {
     return;
   }
