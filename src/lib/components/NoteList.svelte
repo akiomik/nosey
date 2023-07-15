@@ -10,7 +10,7 @@
 </script>
 
 <div class="flex flex-col space-y-8">
-  {#each notes as note (note.id)}
+  {#each notes as note, i (`${note.id}-${i}`)}
     <ExternalLink href="https://nostrapp.link/#{nip19.noteEncode(note.id)}" class="unstyled">
       <NoteListItem {note} />
     </ExternalLink>
