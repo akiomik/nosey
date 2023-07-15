@@ -1,5 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { search } from '$lib/helpers/search';
+import { parseQuery } from '$lib/helpers/parseQuery';
 
 export async function load({ url }: RequestEvent) {
   const q = url.searchParams.get('q');
@@ -14,7 +15,7 @@ export async function load({ url }: RequestEvent) {
   }
 
   const result = await search({
-    query: q,
+    ...parseQuery(q),
     kind: 1,
     limit: 100,
     sort: 'time',
