@@ -11,12 +11,12 @@
     <FooterItem>&copy; 2023 nosquawks</FooterItem>
     <FooterItem>
       <ExternalLink href="https://github.com/akiomik/nosquawks" class="unstyled">
-        <FontAwesomeIcon icon={faGithub} title="Open our Github repository" />
+        <FontAwesomeIcon icon={faGithub} title="Open our Github repository" class="w-4 inline" />
       </ExternalLink>
     </FooterItem>
     <FooterItem last={true}>
       <ExternalLink href="lightning:akiomik@stacker.news" class="unstyled">
-        <FontAwesomeIcon icon={faBolt} title="Open our Lightning Address" />
+        <FontAwesomeIcon icon={faBolt} title="Open our Lightning Address" class="w-4 inline" />
       </ExternalLink>
     </FooterItem>
   </ul>
