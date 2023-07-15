@@ -92,8 +92,10 @@
 </script>
 
 <form on:submit={handleSearch} class="relative" bind:this={form}>
-  <input bind:this={input} bind:value={query} />
-  <button type="submit" class="btn variant-filled-primary">Search</button>
+  <div class="input-group input-group-divider grid-cols-[1fr_auto]">
+    <input type="search" bind:this={input} bind:value={query} />
+    <button type="submit" class="variant-filled-primary">Search</button>
+  </div>
 </form>
 
 {#if data.result}
