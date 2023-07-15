@@ -44,11 +44,12 @@
       const { default: Tribute } = await import('tributejs');
 
       const tribute = new Tribute({
+        trigger: 'from:@',
         menuContainer: form,
         requireLeadingSpace: false,
-        containerClass: 'list-nav card p-4 z-10',
+        containerClass: 'list-nav card p-4 z-10 mt-2',
         itemClass: 'flex items-center gap-2',
-        selectTemplate: (item) => nip19.npubEncode(item.original.pubkey),
+        selectTemplate: (item) => `from:${nip19.npubEncode(item.original.pubkey)}`,
         menuItemTemplate: (item) => {
           const picture = item.original.picture
             ? `<img src="${item.original.picture}" class="rounded-full inline-block w-6" />`
@@ -63,7 +64,7 @@
             return callback([]);
           }
 
-          const req = createRxOneshotReq({ filters: [{ kinds: [0], search: text, limit: 25 }] });
+          const req = createRxOneshotReq({ filters: [{ kinds: [0], search: text, limit: 10 }] });
 
           // TODO: select the latest metadata by each pubkey
           rxNostr
@@ -97,19 +98,20 @@
 
 <form
   on:submit={handleSearch}
-  class="flex flex-col gap-8 relative justify-center items-center"
+  class="flex flex-col gap-8 justify-center items-center"
   class:h-full={isInitial}
-  bind:this={form}
 >
   {#if isInitial}
     <h1 class="h1">nosquawks</h1>
   {/if}
 
-  <div class="input-group input-group-divider grid-cols-[1fr_auto]">
-    <input type="search" bind:this={input} bind:value={query} />
-    <button type="submit" class="variant-filled-primary">
-      <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
-    </button>
+  <div bind:this={form} class="relative w-full">
+    <div class="input-group input-group-divider grid-cols-[1fr_auto]">
+      <input type="search" bind:this={input} bind:value={query} />
+      <button type="submit" class="variant-filled-primary">
+        <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
+      </button>
+    </div>
   </div>
 </form>
 
