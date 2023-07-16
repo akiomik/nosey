@@ -7,9 +7,8 @@ export function parseQuery(query: string): Partial<SearchQuery> {
   return query.split(' ').reduce((acc: Partial<SearchQuery>, keyword: string) => {
     const [filter, ...parameters] = keyword.split(':');
 
-    if (filters.includes(filter)) {
-      const parameter = parameters.join(':');
-
+    const parameter = parameters.join(':');
+    if (filters.includes(filter) && parameter !== '') {
       switch (filter) {
         case 'since':
           return { ...acc, since: new Date(parameter) };
