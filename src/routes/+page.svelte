@@ -23,6 +23,10 @@
   const rxNostr = createRxNostr();
   const mattnQuery = 'from:npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
 
+  const handleQuery = (e: Event) => {
+    query = e.target.value;
+  };
+
   const handleSearch = (e: SubmitEvent) => {
     e.preventDefault();
     goto(`/?${new URLSearchParams({ q: query })}`);
@@ -32,7 +36,8 @@
     goto(`/?${new URLSearchParams({ q: query, page: e.detail })}`);
   };
 
-  $: isInitial = data.q == null;
+  $: q = data.q ?? '';
+  $: isInitial = q == '';
   $: {
     console.debug('data', data);
   }
@@ -129,7 +134,7 @@
 
   <div bind:this={inputContainer} class="relative w-full">
     <div class="input-group input-group-divider grid-cols-[1fr_auto]">
-      <input type="search" bind:this={input} bind:value={query} />
+      <input type="search" bind:this={input} value={q} on:change={handleQuery} />
       <button type="submit" class="variant-filled-primary">
         <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
       </button>
