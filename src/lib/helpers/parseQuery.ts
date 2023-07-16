@@ -15,8 +15,12 @@ export function parseQuery(query: string): Partial<SearchQuery> {
         case 'until':
           return { ...acc, until: new Date(parameter) };
         case 'from': {
-          const { data } = nip19.decode(parameter);
-          return { ...acc, pubkey: data as string };
+          try {
+            const { data } = nip19.decode(parameter);
+            return { ...acc, pubkey: data as string };
+          } catch {
+            return acc; // NOTE: ignore invalid pubkey
+          }
         }
         default:
           throw new Error('unexpected');
