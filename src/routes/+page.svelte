@@ -108,12 +108,12 @@
   {:else}
     <title>nosquawks | A Nostr searcher</title>
   {/if}
-  <meta name="description" content="A Nostr searcher" />
+  <meta name="description" content="nosquawks - A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
   <meta property="og:url" content="https://nosquawks.vercel.app" />
-  <meta property="og:title" content="Nostrends | What's trending on Nostr?" />
-  <meta property="og:description" content="What's trending on Nostr?" />
-  <meta property="og:description" content="What's trending on Nostr?" />
+  <meta property="og:title" content="nosquawks | A Nostr searcher" />
+  <meta property="og:description" content="nosquawks - A Nostr searcher" />
+  <meta property="og:description" content="nosquawks - A Nostr searcher" />
   <link rel="canonical" href="https://nosquawks.vercel.app" />
 </svelte:head>
 
