@@ -49,7 +49,7 @@
         trigger: 'from:@',
         menuContainer: inputContainer,
         requireLeadingSpace: false,
-        containerClass: 'list-nav card p-4 z-10 mt-8',
+        containerClass: 'list-nav card p-4 z-10 mt-2',
         itemClass: 'flex justify-start items-center gap-2',
         selectTemplate: (item) => `from:${nip19.npubEncode(item.original.pubkey)}`,
         menuItemTemplate: (item) => {
