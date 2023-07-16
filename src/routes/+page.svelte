@@ -109,17 +109,17 @@
 
 <svelte:head>
   {#if isInitial}
-    <title>nosquawks | A Nostr searcher</title>
+    <title>nosey | A Nostr searcher</title>
   {:else}
-    <title>{q} - nosquawks | A Nostr searcher</title>
+    <title>{q} - nosey | A Nostr searcher</title>
   {/if}
-  <meta name="description" content="nosquawks - A Nostr searcher" />
+  <meta name="description" content="nosey - A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
-  <meta property="og:url" content="https://nosquawks.vercel.app" />
-  <meta property="og:title" content="nosquawks | A Nostr searcher" />
-  <meta property="og:description" content="nosquawks - A Nostr searcher" />
-  <meta property="og:description" content="nosquawks - A Nostr searcher" />
-  <link rel="canonical" href="https://nosquawks.vercel.app" />
+  <meta property="og:url" content="https://nosey.vercel.app" />
+  <meta property="og:title" content="nosey | A Nostr searcher" />
+  <meta property="og:description" content="nosey - A Nostr searcher" />
+  <meta property="og:description" content="nosey - A Nostr searcher" />
+  <link rel="canonical" href="https://nosey.vercel.app" />
 </svelte:head>
 
 <form
@@ -128,7 +128,7 @@
   class:h-full={isInitial}
 >
   {#if isInitial}
-    <h1 class="h1">nosquawks</h1>
+    <h1 class="h1">nosey</h1>
     <p>A nostr searcher</p>
   {/if}
 

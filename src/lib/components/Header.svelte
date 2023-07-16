@@ -3,5 +3,5 @@
 </script>
 
 <AppBar>
-  <a href="/">nosquawks</a>
+  <a href="/">nosey</a>
 </AppBar>

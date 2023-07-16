@@ -8,9 +8,9 @@
 
 <div class="p-8 flex justify-center">
   <ul class="list-none">
-    <FooterItem>&copy; 2023 nosquawks</FooterItem>
+    <FooterItem>&copy; 2023 nosey</FooterItem>
     <FooterItem>
-      <ExternalLink href="https://github.com/akiomik/nosquawks" class="unstyled">
+      <ExternalLink href="https://github.com/akiomik/nosey" class="unstyled">
         <FontAwesomeIcon icon={faGithub} title="Open our Github repository" class="w-4 inline" />
       </ExternalLink>
     </FooterItem>
