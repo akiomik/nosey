@@ -56,9 +56,9 @@
           const picture = item.original.picture
             ? `<img src="${item.original.picture}" class="rounded-full inline-block w-6" decoding="async" loading="lazy" />`
             : `<div class="inline-block w-6"></div>`;
-          const name = `<span>${item.original.name}</span>`;
+          const name = `<span class="truncate">${item.original.name}</span>`;
           const nip05 = item.original.nip05
-            ? `<span><code class="code">${item.original.nip05}</code></span>`
+            ? `<span class="truncate"><code class="code">${item.original.nip05}</code></span>`
             : '';
           return `${picture}${name}${nip05}`;
         },
