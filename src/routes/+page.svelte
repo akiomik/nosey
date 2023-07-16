@@ -108,10 +108,10 @@
 </script>
 
 <svelte:head>
-  {#if data.q}
-    <title>{data.q} - nosquawks | A Nostr searcher</title>
-  {:else}
+  {#if isInitial}
     <title>nosquawks | A Nostr searcher</title>
+  {:else}
+    <title>{q} - nosquawks | A Nostr searcher</title>
   {/if}
   <meta name="description" content="nosquawks - A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
