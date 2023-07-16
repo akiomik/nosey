@@ -145,12 +145,18 @@
     <Alert>
       <div class="flex gap-1">
         <p><b>Tips:</b></p>
-        <p>
-          By using <code class="code">from:</code> directive you can filter notes by author. (Try
-          typing <a href={`/?q=${encodeURI(mattnQuery)}`}><code class="code">from:@mattn</code></a>)
-        </p>
-      </div></Alert
-    >
+        <div>
+          <p>
+            By using <code class="code">from:npub...</code> directive you can filter notes by author.
+          </p>
+          <p>
+            And you can auto-complete npub by typing <code class="code">from:@</code>
+            (e.g.
+            <a href={`/?q=${encodeURI(mattnQuery)}`}><code class="code">from:@mattn</code></a>)
+          </p>
+        </div>
+      </div>
+    </Alert>
   {/if}
 </form>
 
