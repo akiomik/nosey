@@ -12,6 +12,7 @@
   import { goto } from '$app/navigation';
   import type { PageData } from '$lib/types';
   import NoteList from '$lib/components/NoteList.svelte';
+  import Alert from '$lib/components/Alert.svelte';
 
   export let data: PageData;
 
@@ -20,6 +21,7 @@
   let query = data.q;
 
   const rxNostr = createRxNostr();
+  const mattnQuery = 'from:npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
 
   const handleSearch = (e: SubmitEvent) => {
     e.preventDefault();
@@ -102,11 +104,12 @@
 
 <form
   on:submit={handleSearch}
-  class="flex flex-col gap-8 justify-center items-center"
+  class="flex flex-col gap-6 justify-center items-center"
   class:h-full={isInitial}
 >
   {#if isInitial}
     <h1 class="h1">nosquawks</h1>
+    <p>A nostr searcher</p>
   {/if}
 
   <div bind:this={inputContainer} class="relative w-full">
@@ -117,6 +120,18 @@
       </button>
     </div>
   </div>
+
+  {#if isInitial}
+    <Alert>
+      <div class="flex gap-1">
+        <p><b>Tips:</b></p>
+        <p>By using <code class="code">from:</code> directive you can filter notes by author.</p>
+        <p>
+          (e.g. <a href={`/?q=${encodeURI(mattnQuery)}`}><code class="code">from:@mattn</code></a>)
+        </p>
+      </div>
+    </Alert>
+  {/if}
 </form>
 
 {#if data.result}
