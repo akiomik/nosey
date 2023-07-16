@@ -16,7 +16,7 @@
   export let data: PageData;
 
   let input: HTMLInputElement;
-  let form: HTMLFormElement;
+  let inputContainer: HTMLDivElement;
   let query = data.q;
 
   const rxNostr = createRxNostr();
@@ -45,7 +45,7 @@
 
       const tribute = new Tribute({
         trigger: 'from:@',
-        menuContainer: form,
+        menuContainer: inputContainer,
         requireLeadingSpace: false,
         containerClass: 'list-nav card p-4 z-10 mt-8',
         itemClass: 'flex justify-start items-center gap-2',
@@ -109,7 +109,7 @@
     <h1 class="h1">nosquawks</h1>
   {/if}
 
-  <div bind:this={form} class="relative w-full">
+  <div bind:this={inputContainer} class="relative w-full">
     <div class="input-group input-group-divider grid-cols-[1fr_auto]">
       <input type="search" bind:this={input} bind:value={query} />
       <button type="submit" class="variant-filled-primary">
