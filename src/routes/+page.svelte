@@ -3,7 +3,7 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { Paginator } from '@skeletonlabs/skeleton';
-  import { createRxNostr, createRxOneshotReq } from 'rx-nostr';
+  import { createRxNostr, createRxOneshotReq, filterBy, verify, latestEach } from 'rx-nostr';
   import { map, toArray } from 'rxjs';
   import { nip19 } from 'nostr-tools';
   import { encode } from 'html-entities';
@@ -47,18 +47,25 @@
         trigger: 'from:@',
         menuContainer: form,
         requireLeadingSpace: false,
-        containerClass: 'list-nav card p-4 z-10 mt-2',
-        itemClass: 'flex items-center gap-2',
+        containerClass: 'list-nav card p-4 z-10 mt-8',
+        itemClass: 'flex justify-start items-center gap-2',
         selectTemplate: (item) => `from:${nip19.npubEncode(item.original.pubkey)}`,
         menuItemTemplate: (item) => {
           const picture = item.original.picture
-            ? `<img src="${item.original.picture}" class="rounded-full inline-block w-6" />`
+            ? `<img src="${item.original.picture}" class="rounded-full inline-block w-6" decoding="async" loading="lazy" />`
             : `<div class="inline-block w-6"></div>`;
-          const name = `<span class="flex-auto">${item.string}</span>`;
-          return `${picture}${name}`;
+          const name = `<span>${item.original.name}</span>`;
+          const nip05 = item.original.nip05
+            ? `<span><code class="code">${item.original.nip05}</code></span>`
+            : '';
+          return `${picture}${name}${nip05}`;
         },
-        lookup: 'label',
+        lookup: 'content',
         fillAttr: 'name',
+        searchOpts: {
+          skip: true,
+        },
+        menuItemLimit: 10,
         values: (text, callback) => {
           if (text === '') {
             return callback([]);
@@ -66,10 +73,12 @@
 
           const req = createRxOneshotReq({ filters: [{ kinds: [0], search: text, limit: 10 }] });
 
-          // TODO: select the latest metadata by each pubkey
           rxNostr
             .use(req)
             .pipe(
+              filterBy({ kinds: [0], search: text }),
+              verify(),
+              latestEach(({ event }) => event.pubkey),
               map(({ event }) => event),
               toArray()
             )
@@ -77,15 +86,10 @@
               // NOTE: Tribute has an XSS issue (https://github.com/zurb/tribute/issues/833)
               // TODO: filter value if validName is blank
               const values = events.map(({ pubkey, content }) => {
-                const { name, display_name: displayName, picture } = JSON.parse(content);
-                const validName = encode(name ?? displayName);
+                const { name, display_name: displayName, picture, nip05 } = JSON.parse(content);
+                const validName = encode(name ?? displayName ?? pubkey);
 
-                let label = validName;
-                if (name && displayName) {
-                  label = encode(`${displayName} (@${name})`);
-                }
-
-                return { pubkey, name: validName, label, picture };
+                return { pubkey, content, name: validName, picture, nip05 };
               });
               callback(values);
             });
