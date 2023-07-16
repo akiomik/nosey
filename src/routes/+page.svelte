@@ -102,6 +102,21 @@
   });
 </script>
 
+<svelte:head>
+  {#if data.q}
+    <title>{data.q} - nosquawks | A Nostr searcher</title>
+  {:else}
+    <title>nosquawks | A Nostr searcher</title>
+  {/if}
+  <meta name="description" content="A Nostr searcher" />
+  <meta name="keywords" content="nostr,search,notes,damus,snort" />
+  <meta property="og:url" content="https://nosquawks.vercel.app" />
+  <meta property="og:title" content="Nostrends | What's trending on Nostr?" />
+  <meta property="og:description" content="What's trending on Nostr?" />
+  <meta property="og:description" content="What's trending on Nostr?" />
+  <link rel="canonical" href="https://nosquawks.vercel.app" />
+</svelte:head>
+
 <form
   on:submit={handleSearch}
   class="flex flex-col gap-6 justify-center items-center"
