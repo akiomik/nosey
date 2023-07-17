@@ -1,18 +1,15 @@
-# create-svelte
+# nosey
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Nosey is a search app for [nostr](https://nostr.com).
+Focus on supporting features similar to Twitter search directives.
 
-## Creating a project
+- https://nosey.vercel.app
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+- `from:npub...` directive
+- `from:@...` for npub completion (using NIP-50)
+- `since:YYYY-MM-DD` and `until:YYYY-MM-DD` directives (limited support)
 
 ## Developing
 
@@ -34,5 +31,3 @@ npm run build
 ```
 
 You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
