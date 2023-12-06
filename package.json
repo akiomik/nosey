@@ -14,7 +14,7 @@
   "devDependencies": {
     "@skeletonlabs/skeleton": "^1.9.0",
     "@sveltejs/adapter-auto": "^2.0.0",
-    "@sveltejs/kit": "^1.20.4",
+    "@sveltejs/kit": "^1.27.7",
     "@tailwindcss/forms": "^0.5.4",
     "@types/url-regex-safe": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
