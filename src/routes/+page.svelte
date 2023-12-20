@@ -134,7 +134,8 @@
 
   <div bind:this={inputContainer} class="relative w-full">
     <div class="input-group input-group-divider grid-cols-[1fr_auto]">
-      <input type="search" bind:this={input} value={q} on:input={handleQuery} />
+      <!-- svelte-ignore a11y-autofocus -->
+      <input type="search" bind:this={input} value={q} on:input={handleQuery} autofocus />
       <button type="submit" class="variant-filled-primary">
         <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
       </button>
