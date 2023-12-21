@@ -1,6 +1,5 @@
 <script lang="ts">
   import type * as Nostr from 'nostr-typedef';
-  import NoteListItemProfile from '$lib/components/NoteListItemProfile.svelte';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
@@ -8,6 +7,7 @@
   import { popup } from '@skeletonlabs/skeleton';
   import type { PopupSettings } from '@skeletonlabs/skeleton';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
+  import { Avatar } from '@skeletonlabs/skeleton';
 
   export let note: Nostr.Event;
   export let profile: Nostr.Event;
@@ -18,14 +18,24 @@
     target: popupTargetId,
     placement: 'bottom',
   };
+  const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
+
+  $: content = profile ? JSON.parse(profile.content) : undefined;
+  $: name = content?.display_name ?? content?.name ?? shorten(note.pubkey);
 </script>
 
 <div class="card">
   <div class="p-4">
-    <div class="flex-auto flex justify-between items-center">
-      <NoteListItemProfile {profile} pubkey={note.pubkey} />
+    <div class="flex justify-between items-center">
+      <div class="mr-2 flex-none">
+        <Avatar src={content?.picture} initials="NO" alt="Profile picture of {name}" />
+      </div>
 
-      <button class="btn-icon" use:popup={menuPopup}>
+      <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">
+        {name}
+      </p>
+
+      <button class="btn-icon flex-none" use:popup={menuPopup}>
         <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
       </button>
     </div>
