@@ -1,15 +1,23 @@
 <script lang="ts">
   import '../app.postcss';
 
-  import { AppShell, storePopup } from '@skeletonlabs/skeleton';
+  import { AppShell, Modal, storePopup, initializeStores } from '@skeletonlabs/skeleton';
   import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
   import { navigating } from '$app/stores';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+  import AdvancedSearchModal from '$lib/components/AdvancedSearchModal.svelte';
 
+  initializeStores();
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
+
+  const modalRegistry = {
+    advancedSearch: { ref: AdvancedSearchModal },
+  };
 </script>
+
+<Modal components={modalRegistry} />
 
 <AppShell>
   <svelte:fragment slot="pageHeader">
