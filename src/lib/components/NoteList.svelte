@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { nip19 } from 'nostr-tools';
   import type * as Nostr from 'nostr-typedef';
 
-  import ExternalLink from '$lib/components/ExternalLink.svelte';
   import NoteListItem from '$lib/components/NoteListItem.svelte';
   import Alert from '$lib/components/Alert.svelte';
 
