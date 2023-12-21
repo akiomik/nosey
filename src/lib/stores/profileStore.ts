@@ -1,6 +1,6 @@
 import { createRxNostr, createRxOneshotReq, filterBy, verify, latestEach } from 'rx-nostr';
 import { readable, type Readable } from 'svelte/store';
-import { map, toArray } from 'rxjs';
+import { map } from 'rxjs';
 import type * as Nostr from 'nostr-typedef';
 import { browser } from '$app/environment';
 
@@ -9,7 +9,7 @@ export const profileStore = (pubkeys: string[]): Readable<Record<string, Nostr.E
     return readable({});
   }
 
-  return readable({}, (set) => {
+  return readable({}, (_, update) => {
     const rxNostr = createRxNostr();
     rxNostr.switchRelays(['wss://relay.damus.io', 'wss://nos.lol', 'wss://yabu.me']).then(() => {
       const req = createRxOneshotReq({
@@ -20,13 +20,17 @@ export const profileStore = (pubkeys: string[]): Readable<Record<string, Nostr.E
         filterBy({ kinds: [0], authors: pubkeys }),
         verify(),
         latestEach(({ event }) => event.pubkey),
-        map(({ event }) => event),
-        toArray()
+        map(({ event }) => event)
       );
 
-      sub.subscribe((events) => {
-        const entries = events.map((event) => [event.pubkey, event]);
-        set(Object.fromEntries(entries));
+      sub.subscribe((event) => {
+        update(($profileMap: Record<string, Nostr.Event>) => {
+          if ($profileMap[event.pubkey]) {
+            return { ...$profileMap };
+          }
+
+          return { ...$profileMap, ...Object.fromEntries([[event.pubkey, event]]) };
+        });
       });
     });
 
