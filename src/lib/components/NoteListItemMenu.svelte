@@ -28,6 +28,9 @@
       </button>
     </li>
     <li>
+      <button class="w-full" use:clipboard={note.content}>Copy text</button>
+    </li>
+    <li>
       <ExternalLink href="https://njump.me/{npub}">Open author with njump.me</ExternalLink>
     </li>
     <li>
