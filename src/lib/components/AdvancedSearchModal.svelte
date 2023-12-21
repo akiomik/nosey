@@ -16,7 +16,7 @@
     until: undefined,
   };
 
-  const onFormSubmit = (e) => {
+  const onFormSubmit = (e: Event) => {
     e.preventDefault();
 
     if ($modalStore[0].response) {

@@ -17,6 +17,10 @@
   const mattnQuery = 'from:npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
 
   const handleQuery = (e: Event) => {
+    if (!(e.target instanceof HTMLInputElement)) {
+      return;
+    }
+
     query = e.target.value;
   };
 
@@ -106,7 +110,7 @@
   <NoteList notes={data.result.data} />
   <Paginator
     settings={{
-      offset: data.page,
+      page: data.page,
       size: data.result.pagination.total_records,
       limit: data.result.pagination.limit,
       amounts: [data.result.pagination.limit],
