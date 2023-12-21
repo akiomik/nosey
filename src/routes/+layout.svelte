@@ -3,11 +3,14 @@
   import '@skeletonlabs/skeleton/styles/skeleton.css';
   import '../app.postcss';
 
-  import { AppShell } from '@skeletonlabs/skeleton';
+  import { AppShell, storePopup } from '@skeletonlabs/skeleton';
+  import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
   import { navigating } from '$app/stores';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+
+  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 </script>
 
 <AppShell>

@@ -11,9 +11,7 @@
 
 <div class="flex flex-col space-y-8">
   {#each notes as note, i (`${note.id}-${i}`)}
-    <ExternalLink href="https://nostrapp.link/#{nip19.noteEncode(note.id)}" class="unstyled">
-      <NoteListItem {note} />
-    </ExternalLink>
+    <NoteListItem {note} />
   {:else}
     <Alert variant="warning">
       <p>No data found &#128064;</p>
