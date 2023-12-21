@@ -1,17 +1,19 @@
 <script lang="ts">
   import { Avatar } from '@skeletonlabs/skeleton';
-  import type { Profile } from '$lib/types';
+  import type * as Nostr from 'nostr-typedef';
 
-  export let profile: Profile | undefined = undefined;
+  export let profile: Nostr.Event | undefined = undefined;
   export let pubkey: string;
 
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
-  const name = profile ? profile?.display_name ?? profile?.name ?? 'nostrich' : shorten(pubkey);
+
+  $: content = profile ? JSON.parse(profile.content) : undefined;
+  $: name = content?.display_name ?? content?.name ?? shorten(pubkey);
 </script>
 
 <div class="flex items-center">
   <div class="mr-2">
-    <Avatar initials="NO" alt="Profile picture of {name}" />
+    <Avatar src={content?.picture} initials="NO" alt="Profile picture of {name}" />
   </div>
 
   <div class="text-ellipsis overflow-hidden">

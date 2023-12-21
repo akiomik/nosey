@@ -10,6 +10,7 @@
   import NoteListItemMenu from './NoteListItemMenu.svelte';
 
   export let note: Nostr.Event;
+  export let profile: Nostr.Event;
 
   const popupTargetId = `menu-${note.id}`;
   const menuPopup: PopupSettings = {
@@ -22,7 +23,7 @@
 <div class="card">
   <div class="p-4">
     <div class="flex-auto flex justify-between items-center">
-      <NoteListItemProfile pubkey={note.pubkey} />
+      <NoteListItemProfile {profile} pubkey={note.pubkey} />
 
       <button class="btn-icon" use:popup={menuPopup}>
         <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
