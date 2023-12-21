@@ -8,6 +8,7 @@
   export let popupId: string;
 
   const npub = nip19.npubEncode(note.pubkey);
+  const noteId = nip19.noteEncode(note.id);
   const nevent = nip19.neventEncode({
     id: note.id,
     author: note.pubkey,
@@ -19,12 +20,17 @@
   <ul class="list-nav">
     <li>
       <button class="w-full" use:clipboard={npub}>
-        Copy <code class="code ml-1">npub</code>
+        Copy <code class="code ml-1">npub1</code>
+      </button>
+    </li>
+    <li>
+      <button class="w-full" use:clipboard={noteId}>
+        Copy <code class="code mx-1">note1</code> id
       </button>
     </li>
     <li>
       <button class="w-full" use:clipboard={nevent}>
-        Copy <code class="code ml-1">nevent</code>
+        Copy <code class="code mx-1">nevent1</code> id
       </button>
     </li>
     <li>
