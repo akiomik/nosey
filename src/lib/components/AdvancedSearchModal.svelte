@@ -1,10 +1,12 @@
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
   import { getModalStore } from '@skeletonlabs/skeleton';
+  import { autocomplete } from '$lib/actions/autocomplete';
 
   export let parent: SvelteComponent;
 
   const modalStore = getModalStore();
+  let authorContainer: HTMLDivElement;
 
   // TODO: Support current query
   const formData = {
@@ -41,8 +43,21 @@
       </label>
       <label class="label">
         <span>Author</span>
-        <!-- TODO: Add autocompletion support -->
-        <input class="input" type="text" bind:value={formData.from} placeholder="npub1..." />
+        <div bind:this={authorContainer} class="relative w-full">
+          {#if authorContainer}
+            <input
+              class="input"
+              type="text"
+              bind:value={formData.from}
+              placeholder="npub1..."
+              use:autocomplete={{
+                containerElement: authorContainer,
+                relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
+                prefix: '',
+              }}
+            />
+          {/if}
+        </div>
       </label>
       <label class="label">
         <span>Since</span>
