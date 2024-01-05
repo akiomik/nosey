@@ -7,6 +7,7 @@
   import type { PageData } from '$lib/types';
   import NoteList from '$lib/components/NoteList.svelte';
   import Alert from '$lib/components/Alert.svelte';
+  import JsonLd from '$lib/components/JsonLd.svelte';
   import { autocomplete } from '$lib/actions/autocomplete';
 
   export let data: PageData;
@@ -34,7 +35,10 @@
   };
 
   $: q = data.q ?? '';
+  $: page = data.page === 0 ? undefined : data.page;
+  $: params = page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q });
   $: isInitial = q == '';
+  $: url = `https://nosey.vercel.app${isInitial ? '' : `/${params}`}`;
   $: {
     console.debug('data', data);
   }
@@ -44,15 +48,17 @@
   {#if isInitial}
     <title>nosey | A Nostr searcher</title>
   {:else}
-    <title>{q} - nosey | A Nostr searcher</title>
+    <title>{q} - nosey</title>
   {/if}
-  <meta name="description" content="nosey - A Nostr searcher" />
+  <meta name="description" content="A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
-  <meta property="og:url" content="https://nosey.vercel.app" />
+  <meta property="og:url" content={url} />
   <meta property="og:title" content="nosey | A Nostr searcher" />
   <meta property="og:description" content="nosey - A Nostr searcher" />
-  <meta property="og:description" content="nosey - A Nostr searcher" />
-  <link rel="canonical" href="https://nosey.vercel.app" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="nosey" />
+  <link rel="canonical" href={url} />
+  <JsonLd {url} isRoot={isInitial} />
 </svelte:head>
 
 <form
