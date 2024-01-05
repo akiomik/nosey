@@ -78,6 +78,7 @@
         <input
           type="search"
           value={q}
+          aria-label="search"
           on:input={handleQuery}
           use:autocomplete={{
             containerElement: inputContainer,
