@@ -98,7 +98,11 @@ export const autocomplete = (node: HTMLElement, opts: Partial<Opts>) => {
   return {
     destroy() {
       asyncDisposer
-        .then((disposer) => disposer())
+        .then((disposer) => {
+          if (typeof disposer === 'function') {
+            disposer();
+          }
+        })
         .catch((e) => {
           console.error('failed to execute destroy', e);
         });
