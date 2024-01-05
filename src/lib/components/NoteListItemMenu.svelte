@@ -14,6 +14,8 @@
     author: note.pubkey,
     kind: note.kind,
   });
+  const nosarayDuration = 10; // mins
+  const nosaraySince = new Date((note.created_at - (nosarayDuration / 2) * 60) * 1000);
 </script>
 
 <div class="card p-2 w-64 z-10 shadow" data-popup={popupId}>
@@ -41,6 +43,13 @@
     </li>
     <li>
       <ExternalLink href="https://njump.me/{nevent}">Open note with njump.me</ExternalLink>
+    </li>
+    <li>
+      <ExternalLink
+        href="https://nosaray.vercel.app/?since={nosaraySince.toISOString()}&dur={nosarayDuration}m"
+      >
+        See posts around this on Nosaray
+      </ExternalLink>
     </li>
   </ul>
 </div>
