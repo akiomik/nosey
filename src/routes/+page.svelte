@@ -57,6 +57,7 @@
   <meta property="og:description" content="A Nostr searcher" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="nosey" />
+  <meta property="og:image" content="https://nosey.vercel.app/ogp.png" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:image" content="https://nosey.vercel.app/favicon.png" />
   <link rel="canonical" href={url} />
