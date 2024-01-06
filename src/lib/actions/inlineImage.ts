@@ -30,6 +30,10 @@ const defaultOpts: Opts = {
   },
 };
 
+function uniq<T>(xs: T[]): T[] {
+  return [...new Set(xs)];
+}
+
 // TODO: Add `Action` type
 export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
   const mergedOpts = { ...defaultOpts, ...opts };
@@ -41,8 +45,8 @@ export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
 
   // TODO: traverse innerText of children
   let text = node.innerHTML;
-  [...matches].forEach((match) => {
-    const urlString = match[0];
+  uniq([...matches].map((m) => m[0])).forEach((match) => {
+    const urlString = match;
     if (!mergedOpts.validate(urlString, mergedOpts.extPattern)) {
       return;
     }
@@ -53,7 +57,7 @@ export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
       class: mergedOpts.className,
     };
     const tag = mergedOpts.render(mergedOpts.tagName, attributes);
-    text = text.replace(urlString, tag);
+    text = text.replaceAll(urlString, tag);
   });
 
   node.innerHTML = text;
