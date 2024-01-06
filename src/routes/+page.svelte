@@ -53,8 +53,8 @@
   <meta name="description" content="A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
   <meta property="og:url" content={url} />
-  <meta property="og:title" content="nosey | A Nostr searcher" />
-  <meta property="og:description" content="nosey - A Nostr searcher" />
+  <meta property="og:title" content={isInitial ? 'nosey' : `{q} - nosey`} />
+  <meta property="og:description" content="A Nostr searcher" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="nosey" />
   <link rel="canonical" href={url} />
