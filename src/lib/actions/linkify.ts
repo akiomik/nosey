@@ -3,6 +3,7 @@ import linkifyHtml from 'linkify-html';
 import type { Opts } from 'linkifyjs';
 
 export const linkifyOpts = {
+  className: 'underline',
   target: '_blank',
   rel: 'external noreferrer',
   format: (value: string, type: string) => {
