@@ -20,17 +20,28 @@
   };
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
 
-  $: content = profile ? JSON.parse(profile.content) : undefined;
-  $: displayName = content && content.display_name ? content.display_name : undefined;
-  $: name = content && content.name ? content.name : undefined;
+  $: profileContent = profile ? JSON.parse(profile.content) : undefined;
+  $: displayName =
+    profileContent && profileContent.display_name ? profileContent.display_name : undefined;
+  $: name = profileContent && profileContent.name ? profileContent.name : undefined;
   $: nameOrPubkey = displayName ?? name ?? shorten(note.pubkey);
+
+  $: noteContent = note.content
+    ?.replaceAll(/nostr:npub1([a-z0-9]{58})/g, '@npub1$1')
+    ?.replaceAll(/nostr:nprofile1([a-z0-9]{61,})/g, '@nprofile1$1')
+    ?.replaceAll(/nostr:note1([a-z0-9]{58})/g, '@note1$1')
+    ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1');
 </script>
 
 <div class="card">
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
-        <Avatar src={content?.picture} initials="NO" alt="Profile picture of {nameOrPubkey}" />
+        <Avatar
+          src={profileContent?.picture}
+          initials="NO"
+          alt="Profile picture of {nameOrPubkey}"
+        />
       </div>
 
       <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">
@@ -52,7 +63,7 @@
       use:linkify={linkifyOpts}
       class="text-ellipsis overflow-hidden line-clamp-8 mt-4"
     >
-      {note.content}
+      {noteContent}
     </p>
   </div>
 

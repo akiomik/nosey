@@ -1,4 +1,5 @@
 import linkifyHtml from 'linkify-html';
+import 'linkify-plugin-mention';
 // import type { Action } from 'svelte/runtime/action/public';
 import type { Opts } from 'linkifyjs';
 
@@ -14,7 +15,6 @@ export const linkifyOpts = {
     return value;
   },
   formatHref: (href: string, type: string) => {
-    console.log(href);
     if (type === 'hashtag') {
       return `https://snort.social/t/${href.substring(1)}`;
     } else if (type === 'mention' && (href.startsWith('/npub1') || href.startsWith('/nprofile1'))) {
@@ -27,11 +27,31 @@ export const linkifyOpts = {
   },
   truncate: 54,
   validate: (value: string, type: string) => {
-    if (type === 'url' && !value.startsWith('http')) {
-      return false;
+    if (type === 'url' && value.startsWith('http')) {
+      return true;
     }
 
-    return true;
+    if (type === 'mention' && value.startsWith('@npub1') && value.length === 64) {
+      return true;
+    }
+
+    if (type === 'mention' && value.startsWith('@nprofile1') && value.length >= 71) {
+      return true;
+    }
+
+    if (type === 'mention' && value.startsWith('@note1') && value.length === 64) {
+      return true;
+    }
+
+    if (type === 'mention' && value.startsWith('@nevent1') && value.length >= 78) {
+      return true;
+    }
+
+    if (type === 'tag') {
+      return true;
+    }
+
+    return false;
   },
   nl2br: true,
 };
