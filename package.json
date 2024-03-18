@@ -45,7 +45,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/svelte-fontawesome": "^0.2.1",
-    "html-entities": "^2.4.0",
+    "html-entities": "^2.5.2",
     "linkify-html": "^4.1.1",
     "linkify-plugin-mention": "^4.1.3",
     "linkifyjs": "^4.1.1",
