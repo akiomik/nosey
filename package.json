@@ -42,7 +42,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "^1.6.3",
-    "@fortawesome/free-brands-svg-icons": "^6.4.0",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/svelte-fontawesome": "^0.2.2",
     "html-entities": "^2.5.2",
