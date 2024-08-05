@@ -43,7 +43,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.6.7",
     "@fortawesome/free-brands-svg-icons": "^6.5.2",
-    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/svelte-fontawesome": "^0.2.2",
     "html-entities": "^2.5.2",
     "linkify-html": "^4.1.1",
