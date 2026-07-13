@@ -1,16 +1,29 @@
 <script lang="ts">
   import '../app.css';
 
+  import { Toast } from '@skeletonlabs/skeleton-svelte';
   import { navigating } from '$app/state';
   import Footer from '$lib/components/Footer.svelte';
   import Header from '$lib/components/Header.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+  import { toaster } from '$lib/stores/toaster';
 
   interface Props {
     children?: import('svelte').Snippet;
   }
 
   let { children }: Props = $props();
+
+  const toastClass = (type: string | undefined) => {
+    switch (type) {
+      case 'success':
+        return 'preset-tonal-success';
+      case 'error':
+        return 'preset-tonal-error';
+      default:
+        return 'preset-tonal-surface';
+    }
+  };
 </script>
 
 <div class="min-h-svh flex flex-col">
@@ -37,3 +50,11 @@
     <Footer />
   </footer>
 </div>
+
+<Toast.Group {toaster}>
+  {#snippet children(toast)}
+    <Toast {toast} class="card p-4 shadow-xl {toastClass(toast.type)}">
+      <Toast.Title class="font-bold">{toast.title}</Toast.Title>
+    </Toast>
+  {/snippet}
+</Toast.Group>

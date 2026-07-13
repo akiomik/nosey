@@ -2,7 +2,7 @@
   import { Menu } from '@skeletonlabs/skeleton-svelte';
   import { nip19 } from 'nostr-tools';
   import type * as Nostr from 'nostr-typedef';
-  import { copyToClipboard } from '$lib/helpers/copyToClipboard';
+  import { copyToClipboardWithToast } from '$lib/helpers/copyToClipboardWithToast';
 
   interface Props {
     note: Nostr.Event;
@@ -25,16 +25,32 @@
   const itemClass = 'block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal';
 </script>
 
-<Menu.Item value="copy-npub" onclick={() => copyToClipboard(npub)} class={itemClass}>
+<Menu.Item
+  value="copy-npub"
+  onclick={() => copyToClipboardWithToast(npub, 'npub1')}
+  class={itemClass}
+>
   Copy <code class="code ml-1">npub1</code>
 </Menu.Item>
-<Menu.Item value="copy-note-id" onclick={() => copyToClipboard(noteId)} class={itemClass}>
+<Menu.Item
+  value="copy-note-id"
+  onclick={() => copyToClipboardWithToast(noteId, 'note1 id')}
+  class={itemClass}
+>
   Copy <code class="code mx-1">note1</code> id
 </Menu.Item>
-<Menu.Item value="copy-nevent-id" onclick={() => copyToClipboard(nevent)} class={itemClass}>
+<Menu.Item
+  value="copy-nevent-id"
+  onclick={() => copyToClipboardWithToast(nevent, 'nevent1 id')}
+  class={itemClass}
+>
   Copy <code class="code mx-1">nevent1</code> id
 </Menu.Item>
-<Menu.Item value="copy-text" onclick={() => copyToClipboard(note.content)} class={itemClass}>
+<Menu.Item
+  value="copy-text"
+  onclick={() => copyToClipboardWithToast(note.content, 'text')}
+  class={itemClass}
+>
   Copy text
 </Menu.Item>
 <Menu.Item value="njump-author">
