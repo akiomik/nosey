@@ -1,10 +1,7 @@
 <script lang="ts">
-  import '../app.postcss';
+  import '../app.css';
 
-  import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
-  import { AppShell, initializeStores, Modal, storePopup } from '@skeletonlabs/skeleton';
   import { navigating } from '$app/state';
-  import AdvancedSearchModal from '$lib/components/AdvancedSearchModal.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import Header from '$lib/components/Header.svelte';
   import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
@@ -14,23 +11,12 @@
   }
 
   let { children }: Props = $props();
-
-  initializeStores();
-  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
-
-  const modalRegistry = {
-    advancedSearch: { ref: AdvancedSearchModal },
-  };
 </script>
 
-<Modal components={modalRegistry} />
-
-<AppShell>
-  {#snippet pageHeader()}
-  
-      <Header />
-    
-  {/snippet}
+<div class="h-full overflow-hidden flex flex-col">
+  <header class="sticky top-0 z-10">
+    <Header />
+  </header>
 
   {#if navigating.to}
     <div class="fixed inset-0 z-[15] bg-black opacity-60">
@@ -40,15 +26,14 @@
     </div>
   {/if}
 
-  <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4 h-full">
-    {@render children?.()}
-  </div>
+  <main class="flex-1 overflow-y-auto">
+    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4">
+      {@render children?.()}
+    </div>
+  </main>
 
-  {#snippet pageFooter()}
-  
-      <hr />
-
-      <Footer />
-    
-  {/snippet}
-</AppShell>
+  <footer>
+    <hr />
+    <Footer />
+  </footer>
+</div>
