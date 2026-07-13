@@ -7,6 +7,12 @@
   import type { AdvancedSearchFormData } from '$lib/types';
   import AdvancedSearchModal from './AdvancedSearchModal.svelte';
 
+  interface Props {
+    onAdvancedSearchOpen: () => void;
+  }
+
+  let { onAdvancedSearchOpen }: Props = $props();
+
   let isAdvancedSearchOpen = $state(false);
 
   const handleSubmit = (form: AdvancedSearchFormData) => {
@@ -16,12 +22,19 @@
     goto(`/?${new URLSearchParams({ q: query })}`);
     isAdvancedSearchOpen = false;
   };
+
+  const handleDialogOpenChange = (d: { open: boolean }) => {
+    isAdvancedSearchOpen = d.open;
+    if (d.open) {
+      onAdvancedSearchOpen();
+    }
+  };
 </script>
 
 <div class="card preset-tonal-surface p-2 w-52 z-20 shadow">
   <ul class="space-y-1">
     <li>
-      <Dialog open={isAdvancedSearchOpen} onOpenChange={(d) => (isAdvancedSearchOpen = d.open)}>
+      <Dialog open={isAdvancedSearchOpen} onOpenChange={handleDialogOpenChange}>
         <Dialog.Trigger
           class="block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal"
         >

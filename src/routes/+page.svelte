@@ -130,25 +130,27 @@
 
 {#if data.result}
   <NoteList notes={data.result.data} />
-  <Pagination
-    count={data.result.pagination.total_records}
-    pageSize={data.result.pagination.limit}
-    page={data.page + 1}
-    onPageChange={(e) => handlePage(e.page - 1)}
-    class="w-full flex justify-center gap-1"
-  >
-    <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
-    <Pagination.Context>
-      {#snippet children(pagination)}
-        {#each pagination().pages as p, i}
-          {#if p.type === 'page'}
-            <Pagination.Item {...p} class="btn-icon">{p.value}</Pagination.Item>
-          {:else}
-            <Pagination.Ellipsis index={i} class="btn-icon">&hellip;</Pagination.Ellipsis>
-          {/if}
-        {/each}
-      {/snippet}
-    </Pagination.Context>
-    <Pagination.NextTrigger class="btn-icon">&rarr;</Pagination.NextTrigger>
-  </Pagination>
+  {#if data.result.pagination.total_records > 0}
+    <Pagination
+      count={data.result.pagination.total_records}
+      pageSize={data.result.pagination.limit}
+      page={data.page + 1}
+      onPageChange={(e) => handlePage(e.page - 1)}
+      class="mx-auto w-fit flex gap-1"
+    >
+      <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
+      <Pagination.Context>
+        {#snippet children(pagination)}
+          {#each pagination().pages as p, i}
+            {#if p.type === 'page'}
+              <Pagination.Item {...p} class="btn-icon">{p.value}</Pagination.Item>
+            {:else}
+              <Pagination.Ellipsis index={i} class="btn-icon">&hellip;</Pagination.Ellipsis>
+            {/if}
+          {/each}
+        {/snippet}
+      </Pagination.Context>
+      <Pagination.NextTrigger class="btn-icon">&rarr;</Pagination.NextTrigger>
+    </Pagination>
+  {/if}
 {/if}

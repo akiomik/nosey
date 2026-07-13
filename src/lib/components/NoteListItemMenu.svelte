@@ -52,12 +52,12 @@
       </button>
     </li>
     <li>
-      <ExternalLink class={itemClass} href="https://njump.me/{npub}">
+      <ExternalLink class={itemClass} href="https://njump.me/{npub}" onclick={onAction}>
         Open author with njump.me
       </ExternalLink>
     </li>
     <li>
-      <ExternalLink class={itemClass} href="https://njump.me/{nevent}">
+      <ExternalLink class={itemClass} href="https://njump.me/{nevent}" onclick={onAction}>
         Open note with njump.me
       </ExternalLink>
     </li>
@@ -65,6 +65,7 @@
       <ExternalLink
         class={itemClass}
         href="https://nosaray.vercel.app/?since={nosaraySince.toISOString()}&dur={nosarayDuration}m"
+        onclick={onAction}
       >
         See posts around this on Nosaray
       </ExternalLink>
