@@ -1,5 +1,10 @@
 <script lang="ts">
-  export let last = false;
+  interface Props {
+    last?: boolean;
+    children?: import('svelte').Snippet;
+  }
+
+  let { last = false, children }: Props = $props();
 
   const className = last
     ? 'inline'
@@ -7,5 +12,5 @@
 </script>
 
 <li class={className}>
-  <slot />
+  {@render children?.()}
 </li>

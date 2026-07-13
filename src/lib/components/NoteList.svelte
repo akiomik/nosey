@@ -4,9 +4,13 @@
   import NoteListItem from '$lib/components/NoteListItem.svelte';
   import { profileStore } from '$lib/stores/profileStore';
 
-  export let notes: Nostr.Event[];
+  interface Props {
+    notes: Nostr.Event[];
+  }
 
-  $: pubkeys = Array.from(
+  let { notes }: Props = $props();
+
+  let pubkeys = $derived(Array.from(
     notes.reduce((acc: Set<string>, a: Nostr.Event) => {
       if (acc.has(a.pubkey)) {
         return acc;
@@ -15,8 +19,8 @@
       acc.add(a.pubkey);
       return acc;
     }, new Set())
-  );
-  $: profileMap = profileStore(pubkeys);
+  ));
+  let profileMap = $derived(profileStore(pubkeys));
 </script>
 
 <div class="flex flex-col space-y-8">

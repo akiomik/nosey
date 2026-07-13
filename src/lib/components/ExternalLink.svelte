@@ -1,10 +1,15 @@
 <script lang="ts">
-  export let href: string;
-  let className = '';
+  interface Props {
+    href: string;
+    class?: string;
+    children?: import('svelte').Snippet;
+  }
 
-  export { className as class };
+  let { href, class: className = '', children }: Props = $props();
+
+  
 </script>
 
 <a {href} rel="external noreferrer" target="_blank" class={className}>
-  <slot />
+  {@render children?.()}
 </a>

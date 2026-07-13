@@ -15,11 +15,13 @@
 
 <AppBar slotTrail="place-content-end">
   <a href="/">nosey</a>
-  <svelte:fragment slot="trail">
-    <button type="button" class="btn-icon" use:popup={menuPopup}>
-      <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
-    </button>
-  </svelte:fragment>
+  {#snippet trail()}
+  
+      <button type="button" class="btn-icon" use:popup={menuPopup}>
+        <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
+      </button>
+    
+  {/snippet}
 </AppBar>
 
 <HeaderMenu popupId={popupTargetId} />

@@ -1,8 +1,14 @@
 <script lang="ts">
-  export let variant: '' | 'warning' | 'error' = '';
+  interface Props {
+    variant?: '' | 'warning' | 'error';
+    icon?: import('svelte').Snippet;
+    children?: import('svelte').Snippet;
+  }
+
+  let { variant = '', icon, children }: Props = $props();
 
   // NOTE: Dynamic class name does not seem to work
-  let className = 'variant-ghost';
+  let className = $state('variant-ghost');
   switch (variant) {
     case 'warning':
       className = 'variant-ghost-warning';
@@ -14,9 +20,9 @@
 </script>
 
 <aside class={`alert ${className}`}>
-  <slot name="icon" />
+  {@render icon?.()}
 
   <div class="alert-message">
-    <slot />
+    {@render children?.()}
   </div>
 </aside>
