@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Paginator } from '@skeletonlabs/skeleton';
+  import { Pagination } from '@skeletonlabs/skeleton-svelte';
 
   import { goto } from '$app/navigation';
   import { autocomplete } from '$lib/actions/autocomplete';
@@ -34,8 +34,8 @@
     goto(`/?${new URLSearchParams({ q: query })}`);
   };
 
-  const handlePage = (e: CustomEvent) => {
-    goto(`/?${new URLSearchParams({ q: query, page: e.detail })}`);
+  const handlePage = (newPage: number) => {
+    goto(`/?${new URLSearchParams({ q: query, page: newPage.toString() })}`);
   };
 
   let q = $derived(data.q ?? '');
@@ -94,7 +94,7 @@
           }}
           autofocus
         />
-        <button type="submit" class="variant-filled-primary">
+        <button type="submit" class="preset-filled-primary-500">
           <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
         </button>
       </div>
@@ -122,13 +122,24 @@
 
 {#if data.result}
   <NoteList notes={data.result.data} />
-  <Paginator
-    settings={{
-      page: data.page,
-      size: data.result.pagination.total_records,
-      limit: data.result.pagination.limit,
-      amounts: [data.result.pagination.limit],
-    }}
-    on:page={handlePage}
-  />
+  <Pagination
+    count={data.result.pagination.total_records}
+    pageSize={data.result.pagination.limit}
+    page={data.page + 1}
+    onPageChange={(e) => handlePage(e.page - 1)}
+  >
+    <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
+    <Pagination.Context>
+      {#snippet children(pagination)}
+        {#each pagination().pages as p, i}
+          {#if p.type === 'page'}
+            <Pagination.Item {...p} class="btn-icon">{p.value}</Pagination.Item>
+          {:else}
+            <Pagination.Ellipsis index={i} class="btn-icon">&hellip;</Pagination.Ellipsis>
+          {/if}
+        {/each}
+      {/snippet}
+    </Pagination.Context>
+    <Pagination.NextTrigger class="btn-icon">&rarr;</Pagination.NextTrigger>
+  </Pagination>
 {/if}
