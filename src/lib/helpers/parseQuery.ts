@@ -4,36 +4,35 @@ import type { SearchQuery } from '$lib/types';
 const filters = ['since', 'until', 'from'];
 
 export function parseQuery(query: string): Partial<SearchQuery> {
-  return query.split(' ').reduce(
-    (acc: Partial<SearchQuery>, keyword: string) => {
-      const [filter, ...parameters] = keyword.split(':');
+  const result: Partial<SearchQuery> = {};
 
-      const parameter = parameters.join(':');
-      if (filters.includes(filter) && parameter !== '') {
-        switch (filter) {
-          case 'since':
-            return { ...acc, since: new Date(parameter) };
-          case 'until':
-            return { ...acc, until: new Date(parameter) };
-          case 'from': {
-            try {
-              const { data } = nip19.decode(parameter);
-              return { ...acc, pubkey: data as string };
-            } catch {
-              return acc; // NOTE: ignore invalid pubkey
-            }
+  for (const keyword of query.split(' ')) {
+    const [filter, ...parameters] = keyword.split(':');
+    const parameter = parameters.join(':');
+
+    if (filters.includes(filter) && parameter !== '') {
+      switch (filter) {
+        case 'since':
+          result.since = new Date(parameter);
+          continue;
+        case 'until':
+          result.until = new Date(parameter);
+          continue;
+        case 'from':
+          try {
+            const { data } = nip19.decode(parameter);
+            result.pubkey = data as string;
+          } catch {
+            // NOTE: ignore invalid pubkey
           }
-          default:
-            throw new Error('unexpected');
-        }
+          continue;
+        default:
+          throw new Error('unexpected');
       }
+    }
 
-      if (acc.query) {
-        return { ...acc, query: `${acc.query} ${keyword}` };
-      }
+    result.query = result.query ? `${result.query} ${keyword}` : keyword;
+  }
 
-      return { ...acc, query: keyword };
-    },
-    {} as Partial<SearchQuery>
-  );
+  return result;
 }
