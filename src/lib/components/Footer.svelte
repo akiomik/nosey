@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faGithub } from '@fortawesome/free-brands-svg-icons';
   import { faBolt } from '@fortawesome/free-solid-svg-icons';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import ExternalLink from '$lib/components/ExternalLink.svelte';
   import FooterItem from '$lib/components/FooterItem.svelte';
 </script>

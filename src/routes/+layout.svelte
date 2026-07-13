@@ -1,13 +1,13 @@
 <script lang="ts">
   import '../app.postcss';
 
-  import { AppShell, Modal, storePopup, initializeStores } from '@skeletonlabs/skeleton';
-  import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+  import { arrow, autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+  import { AppShell, initializeStores, Modal, storePopup } from '@skeletonlabs/skeleton';
   import { navigating } from '$app/stores';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
   import AdvancedSearchModal from '$lib/components/AdvancedSearchModal.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+  import Header from '$lib/components/Header.svelte';
+  import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
 
   initializeStores();
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });

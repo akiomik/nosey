@@ -1,13 +1,12 @@
 <script lang="ts">
+  import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import type { PopupSettings } from '@skeletonlabs/skeleton';
+  import { Avatar, popup } from '@skeletonlabs/skeleton';
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
-  import { popup } from '@skeletonlabs/skeleton';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
-  import { Avatar } from '@skeletonlabs/skeleton';
 
   export let note: Nostr.Event;
   export let profile: Nostr.Event;
@@ -23,8 +22,8 @@
   $: profileContent = profile ? JSON.parse(profile.content) : undefined;
   $: displayName =
     profileContent && profileContent.display_name ? profileContent.display_name : undefined;
-  $: name = profileContent && profileContent.name ? profileContent.name : undefined;
-  $: nameOrPubkey = displayName ?? name ?? shorten(note.pubkey);
+  $: profileName = profileContent && profileContent.name ? profileContent.name : undefined;
+  $: nameOrPubkey = displayName ?? profileName ?? shorten(note.pubkey);
 
   $: noteContent = note.content
     ?.replaceAll(/nostr:npub1([a-z0-9]{58})/g, '@npub1$1')
@@ -48,7 +47,7 @@
         {nameOrPubkey}
       </p>
 
-      <button class="btn-icon flex-none" use:popup={menuPopup}>
+      <button type="button" class="btn-icon flex-none" use:popup={menuPopup}>
         <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
       </button>
     </div>

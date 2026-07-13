@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type * as Nostr from 'nostr-typedef';
-  import { nip19 } from 'nostr-tools';
   import { clipboard } from '@skeletonlabs/skeleton';
+  import { nip19 } from 'nostr-tools';
+  import type * as Nostr from 'nostr-typedef';
   import ExternalLink from './ExternalLink.svelte';
 
   export let note: Nostr.Event;
@@ -21,22 +21,22 @@
 <div class="card p-2 w-64 z-10 shadow" data-popup={popupId}>
   <ul class="list-nav">
     <li>
-      <button class="w-full" use:clipboard={npub}>
+      <button type="button" class="w-full" use:clipboard={npub}>
         Copy <code class="code ml-1">npub1</code>
       </button>
     </li>
     <li>
-      <button class="w-full" use:clipboard={noteId}>
+      <button type="button" class="w-full" use:clipboard={noteId}>
         Copy <code class="code mx-1">note1</code> id
       </button>
     </li>
     <li>
-      <button class="w-full" use:clipboard={nevent}>
+      <button type="button" class="w-full" use:clipboard={nevent}>
         Copy <code class="code mx-1">nevent1</code> id
       </button>
     </li>
     <li>
-      <button class="w-full" use:clipboard={note.content}>Copy text</button>
+      <button type="button" class="w-full" use:clipboard={note.content}>Copy text</button>
     </li>
     <li>
       <ExternalLink href="https://njump.me/{npub}">Open author with njump.me</ExternalLink>

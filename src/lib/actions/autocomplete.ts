@@ -1,9 +1,9 @@
-import { nip19 } from 'nostr-tools';
-import { createRxNostr, createRxOneshotReq, filterBy, verify, latestEach } from 'rx-nostr';
-import { map, toArray } from 'rxjs';
 import { encode } from 'html-entities';
-import { browser } from '$app/environment';
+import { nip19 } from 'nostr-tools';
+import { createRxNostr, createRxOneshotReq, filterBy, latestEach, verify } from 'rx-nostr';
+import { map, toArray } from 'rxjs';
 import type { TributeOptions } from 'tributejs';
+import { browser } from '$app/environment';
 
 export type Opts = {
   containerElement: HTMLElement;

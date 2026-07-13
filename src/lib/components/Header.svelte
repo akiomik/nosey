@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { AppBar } from '@skeletonlabs/skeleton';
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faBars } from '@fortawesome/free-solid-svg-icons';
-  import { popup } from '@skeletonlabs/skeleton';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import type { PopupSettings } from '@skeletonlabs/skeleton';
+  import { AppBar, popup } from '@skeletonlabs/skeleton';
   import HeaderMenu from './HeaderMenu.svelte';
 
   const popupTargetId = 'header-menu';
@@ -17,7 +16,7 @@
 <AppBar slotTrail="place-content-end">
   <a href="/">nosey</a>
   <svelte:fragment slot="trail">
-    <button class="btn-icon" use:popup={menuPopup}>
+    <button type="button" class="btn-icon" use:popup={menuPopup}>
       <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
     </button>
   </svelte:fragment>

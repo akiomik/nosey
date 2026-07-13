@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { Paginator } from '@skeletonlabs/skeleton';
 
   import { goto } from '$app/navigation';
-  import type { PageData } from '$lib/types';
-  import NoteList from '$lib/components/NoteList.svelte';
+  import { autocomplete } from '$lib/actions/autocomplete';
   import Alert from '$lib/components/Alert.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
-  import { autocomplete } from '$lib/actions/autocomplete';
+  import NoteList from '$lib/components/NoteList.svelte';
+  import type { PageData } from '$lib/types';
 
   export let data: PageData;
 
@@ -37,7 +37,7 @@
   $: q = data.q ?? '';
   $: page = data.page === 0 ? undefined : data.page;
   $: params = page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q });
-  $: isInitial = q == '';
+  $: isInitial = q === '';
   $: url = `https://nosey.vercel.app${isInitial ? '' : `/${params}`}`;
   $: {
     console.debug('data', data);

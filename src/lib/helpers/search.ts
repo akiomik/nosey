@@ -1,10 +1,10 @@
-import type { SearchQuery, SearchResult, Encoded } from '$lib/types';
-import { HttpBadRequestError, HttpBadGatewayError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
+import type { Encoded, SearchQuery, SearchResult } from '$lib/types';
 
 function encode(query: Partial<SearchQuery>): Encoded<Partial<SearchQuery>> {
   const entries = Object.entries(query)
     .map(([key, value]) => {
-      if (value == null || value == '') {
+      if (value == null || value === '') {
         return [key, ''];
       }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { getModalStore } from '@skeletonlabs/skeleton';
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { getModalStore } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
   import { buildQuery } from '$lib/helpers/buildQuery';
 
@@ -29,7 +29,7 @@
 <div class="card p-2 w-52 z-10 shadow" data-popup={popupId}>
   <ul class="list-nav">
     <li>
-      <button class="w-full" on:click={showAdvancedSearchModal}>
+      <button type="button" class="w-full" on:click={showAdvancedSearchModal}>
         <FontAwesomeIcon icon={faSearch} title="Open menu" class="w-4 inline mr-2" />
         Advanced search
       </button>
