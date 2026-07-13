@@ -1,11 +1,12 @@
 <script lang="ts">
   import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Avatar, Popover, Portal } from '@skeletonlabs/skeleton-svelte';
+  import { Popover, Portal } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
+  import ProfileAvatar from './ProfileAvatar.svelte';
 
   interface Props {
     note: Nostr.Event;
@@ -35,10 +36,7 @@
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
-        <Avatar>
-          <Avatar.Image src={profileContent?.picture} alt="Profile picture of {nameOrPubkey}" />
-          <Avatar.Fallback>NO</Avatar.Fallback>
-        </Avatar>
+        <ProfileAvatar picture={profileContent?.picture} name={nameOrPubkey} />
       </div>
 
       <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">

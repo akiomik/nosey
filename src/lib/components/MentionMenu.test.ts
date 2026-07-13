@@ -61,7 +61,8 @@ describe('MentionMenu', () => {
     const items = [makeItem({ picture: '' })];
     render(MentionMenu, { props: { ...baseProps, loading: false, items, activeIndex: 0 } });
 
-    expect(getContent()?.querySelector('img')).toBeNull();
+    expect(getContent()?.querySelector('img')).toHaveAttribute('hidden');
+    expect(getContent()?.textContent).toContain('NO');
   });
 
   it('renders an item picture as an img src, never as injected markup via the picture field', () => {

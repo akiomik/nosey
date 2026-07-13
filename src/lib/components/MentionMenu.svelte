@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Portal, usePopover } from '@skeletonlabs/skeleton-svelte';
   import type { MentionItem } from '$lib/types';
+  import ProfileAvatar from './ProfileAvatar.svelte';
 
   type AnchorRect = { x?: number; y?: number; width?: number; height?: number };
 
@@ -75,17 +76,7 @@
                 onmousedown={(e) => e.preventDefault()}
                 onclick={() => onSelect(item)}
               >
-                {#if item.picture}
-                  <img
-                    src={item.picture}
-                    class="rounded-full inline-block w-6"
-                    alt=""
-                    decoding="async"
-                    loading="lazy"
-                  />
-                {:else}
-                  <div class="inline-block w-6"></div>
-                {/if}
+                <ProfileAvatar picture={item.picture} name={item.name} class="w-6 h-6 shrink-0" />
                 <span class="truncate">{item.name}</span>
                 {#if item.nip05}
                   <span class="truncate"><code class="code">{item.nip05}</code></span>
