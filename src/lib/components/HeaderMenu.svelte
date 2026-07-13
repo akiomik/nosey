@@ -18,7 +18,7 @@
   };
 </script>
 
-<div class="card p-2 w-52 z-20 shadow">
+<div class="card preset-filled-surface-100-900 p-2 w-52 z-20 shadow">
   <ul class="list-nav">
     <li>
       <Dialog open={isAdvancedSearchOpen} onOpenChange={(d) => (isAdvancedSearchOpen = d.open)}>

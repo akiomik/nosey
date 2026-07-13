@@ -94,7 +94,7 @@
           }}
           autofocus
         />
-        <button type="submit" class="preset-filled-primary-500">
+        <button type="submit" class="btn preset-filled-primary-500">
           <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
         </button>
       </div>

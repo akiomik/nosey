@@ -14,6 +14,8 @@
 
   let { note, profile }: Props = $props();
 
+  let isMenuOpen = $state(false);
+
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
 
   let profileContent = $derived(profile ? JSON.parse(profile.content) : undefined);
@@ -29,7 +31,7 @@
     ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1'));
 </script>
 
-<div class="card">
+<div class="card preset-filled-surface-100-900">
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
@@ -43,14 +45,18 @@
         {nameOrPubkey}
       </p>
 
-      <Popover positioning={{ placement: 'bottom' }}>
+      <Popover
+        positioning={{ placement: 'bottom' }}
+        open={isMenuOpen}
+        onOpenChange={(d) => (isMenuOpen = d.open)}
+      >
         <Popover.Trigger class="btn-icon flex-none">
           <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
         </Popover.Trigger>
         <Portal>
-          <Popover.Positioner class="z-20">
-            <Popover.Content>
-              <NoteListItemMenu {note} />
+          <Popover.Positioner>
+            <Popover.Content class="z-20">
+              <NoteListItemMenu {note} onAction={() => (isMenuOpen = false)} />
             </Popover.Content>
           </Popover.Positioner>
         </Portal>

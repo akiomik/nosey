@@ -6,9 +6,10 @@
 
   interface Props {
     note: Nostr.Event;
+    onAction: () => void;
   }
 
-  let { note }: Props = $props();
+  let { note, onAction }: Props = $props();
 
   const npub = nip19.npubEncode(note.pubkey);
   const noteId = nip19.noteEncode(note.id);
@@ -19,27 +20,32 @@
   });
   const nosarayDuration = 10; // mins
   const nosaraySince = new Date((note.created_at - (nosarayDuration / 2) * 60) * 1000);
+
+  const handleCopy = (text: string) => {
+    copyToClipboard(text);
+    onAction();
+  };
 </script>
 
-<div class="card p-2 w-64 z-20 shadow">
+<div class="card preset-filled-surface-100-900 p-2 w-64 z-20 shadow">
   <ul class="list-nav">
     <li>
-      <button type="button" class="w-full" onclick={() => copyToClipboard(npub)}>
+      <button type="button" class="w-full" onclick={() => handleCopy(npub)}>
         Copy <code class="code ml-1">npub1</code>
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => copyToClipboard(noteId)}>
+      <button type="button" class="w-full" onclick={() => handleCopy(noteId)}>
         Copy <code class="code mx-1">note1</code> id
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => copyToClipboard(nevent)}>
+      <button type="button" class="w-full" onclick={() => handleCopy(nevent)}>
         Copy <code class="code mx-1">nevent1</code> id
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => copyToClipboard(note.content)}>
+      <button type="button" class="w-full" onclick={() => handleCopy(note.content)}>
         Copy text
       </button>
     </li>

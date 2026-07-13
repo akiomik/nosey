@@ -5,6 +5,11 @@
 
 @plugin "@tailwindcss/forms";
 
+/* NOTE: no .dark class is ever applied in this app, so this keeps the
+   previous (v3 darkMode: 'class') behavior of always rendering the
+   light theme regardless of the OS color-scheme preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 html,
 body {
   @apply h-full overflow-hidden;

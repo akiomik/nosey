@@ -25,7 +25,7 @@
   };
 </script>
 
-<div class="card p-4 w-modal shadow-xl space-y-4">
+<div class="card preset-filled-surface-100-900 p-4 w-modal shadow-xl space-y-4">
   <header class="text-2xl font-bold">Advanced search</header>
 
   <form class="p-4 space-y-4 rounded-container-token" onsubmit={handleFormSubmit}>
