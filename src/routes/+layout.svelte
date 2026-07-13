@@ -13,7 +13,7 @@
   let { children }: Props = $props();
 </script>
 
-<div class="h-full overflow-hidden flex flex-col">
+<div class="min-h-svh flex flex-col">
   <header>
     <Header />
   </header>
@@ -26,8 +26,8 @@
     </div>
   {/if}
 
-  <main class="flex-1 overflow-y-auto">
-    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4 h-full">
+  <main class="flex-1 flex flex-col">
+    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4 flex-1 flex flex-col">
       {@render children?.()}
     </div>
   </main>
