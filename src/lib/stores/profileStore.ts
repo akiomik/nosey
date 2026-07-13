@@ -1,7 +1,7 @@
-import { createRxNostr, createRxOneshotReq, filterBy, verify, latestEach } from 'rx-nostr';
-import { readable, type Readable } from 'svelte/store';
-import { map } from 'rxjs';
 import type * as Nostr from 'nostr-typedef';
+import { createRxNostr, createRxOneshotReq, filterBy, latestEach, verify } from 'rx-nostr';
+import { map } from 'rxjs';
+import { type Readable, readable } from 'svelte/store';
 import { browser } from '$app/environment';
 
 export const profileStore = (pubkeys: string[]): Readable<Record<string, Nostr.Event>> => {

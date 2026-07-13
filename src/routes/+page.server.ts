@@ -1,8 +1,8 @@
-import { error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { search } from '$lib/helpers/search';
+import { error } from '@sveltejs/kit';
+import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
 import { parseQuery } from '$lib/helpers/parseQuery';
-import { HttpBadRequestError, HttpBadGatewayError } from '$lib/errors';
+import { search } from '$lib/helpers/search';
 
 export async function load({ url }: RequestEvent) {
   const q = url.searchParams.get('q')?.trim();

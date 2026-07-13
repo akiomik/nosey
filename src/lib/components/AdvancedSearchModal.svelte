@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { SvelteComponent } from 'svelte';
   import { getModalStore } from '@skeletonlabs/skeleton';
+  import type { SvelteComponent } from 'svelte';
   import { autocomplete } from '$lib/actions/autocomplete';
 
   export let parent: SvelteComponent;
@@ -72,10 +72,10 @@
     </form>
 
     <footer class="modal-footer {parent.regionFooter}">
-      <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>
+      <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>
         {parent.buttonTextCancel}
       </button>
-      <button class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Search</button>
+      <button type="button" class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Search</button>
     </footer>
   </div>
 {/if}
