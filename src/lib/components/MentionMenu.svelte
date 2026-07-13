@@ -2,11 +2,12 @@
   import { Portal, usePopover } from '@skeletonlabs/skeleton-svelte';
   import type { MentionItem } from '$lib/types';
 
+  type AnchorRect = { x?: number; y?: number; width?: number; height?: number };
+
   interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    anchorX: number;
-    anchorY: number;
+    getAnchorRect: () => AnchorRect | null;
     anchorElement: HTMLElement;
     loading: boolean;
     items: MentionItem[];
@@ -17,8 +18,7 @@
   let {
     open,
     onOpenChange,
-    anchorX,
-    anchorY,
+    getAnchorRect,
     anchorElement,
     loading,
     items,
@@ -32,11 +32,22 @@
     id,
     open,
     onOpenChange: (d) => onOpenChange(d.open),
-    // Always open below the caret instead of flipping above when the list
-    // grows too tall to fit -- flipping mid-search felt inconsistent.
-    // TODO: with many results and little space below the caret, the menu
-    // can still overflow past the bottom of the viewport; not handled yet.
-    positioning: { placement: 'bottom-start', flip: false },
+    positioning: {
+      // Always open below the caret instead of flipping above when the list
+      // grows too tall to fit -- flipping mid-search felt inconsistent.
+      // TODO: with many results and little space below the caret, the menu
+      // can still overflow past the bottom of the viewport; not handled yet.
+      placement: 'bottom-start',
+      flip: false,
+      // The input has no real DOM node at the caret to anchor to, so anchor to
+      // a virtual rect computed from the caret's on-screen position instead.
+      // `animationFrame` keeps it in sync while typing or scrolling, since
+      // neither fires the resize/scroll events `autoUpdate` listens for by
+      // default for a virtual anchor.
+      getAnchorElement: () => anchorElement,
+      getAnchorRect,
+      listeners: { animationFrame: true },
+    },
     autoFocus: false,
     modal: false,
     closeOnEscape: false,
@@ -44,23 +55,9 @@
     persistentElements: [() => anchorElement],
   }));
 
-  $effect(() => {
-    // Re-read anchorX/anchorY so this effect reruns whenever they change
-    // (typing moves the caret, scrolling moves the anchor). Popover doesn't
-    // notice plain style changes on the anchor element on its own, so it
-    // needs an explicit nudge to recompute its position.
-    anchorX;
-    anchorY;
-    popover().reposition();
-  });
-
   const itemClass = 'w-full flex justify-start items-center gap-2 text-left rounded-base px-3 py-1.5';
 </script>
 
-<div
-  {...popover().getAnchorProps()}
-  style="position: fixed; left: {anchorX}px; top: {anchorY}px; width: 0; height: 0;"
-></div>
 <Portal>
   <div {...popover().getPositionerProps()}>
     <div {...popover().getContentProps()} class="card preset-tonal-surface p-4 z-[300] mt-2 shadow">
