@@ -46,3 +46,11 @@ export type AdvancedSearchFormData = {
   since: string;
   until: string;
 };
+
+export type MentionItem = {
+  pubkey: string;
+  content: string;
+  name: string;
+  picture: string;
+  nip05: string;
+};
