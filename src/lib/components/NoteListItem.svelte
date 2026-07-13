@@ -9,7 +9,7 @@
 
   interface Props {
     note: Nostr.Event;
-    profile: Nostr.Event;
+    profile: Nostr.Event | undefined;
   }
 
   let { note, profile }: Props = $props();

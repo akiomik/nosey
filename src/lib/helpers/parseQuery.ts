@@ -7,7 +7,7 @@ export function parseQuery(query: string): Partial<SearchQuery> {
   const result: Partial<SearchQuery> = {};
 
   for (const keyword of query.split(' ')) {
-    const [filter, ...parameters] = keyword.split(':');
+    const [filter = '', ...parameters] = keyword.split(':');
     const parameter = parameters.join(':');
 
     if (filters.includes(filter) && parameter !== '') {
