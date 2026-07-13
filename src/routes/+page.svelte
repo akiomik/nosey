@@ -2,6 +2,7 @@
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { Pagination } from '@skeletonlabs/skeleton-svelte';
+  import { untrack } from 'svelte';
 
   import { goto } from '$app/navigation';
   import { autocomplete } from '$lib/actions/autocomplete';
@@ -17,7 +18,9 @@
   let { data }: Props = $props();
 
   let inputContainer: HTMLDivElement | undefined = $state();
-  let query = data.q ?? '';
+  // Only the initial value matters here; the `$effect` below keeps this in
+  // sync with `data.q` afterwards, so `data` doesn't need to be tracked.
+  let query = untrack(() => data.q ?? '');
 
   const mattnQuery = 'from:npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
 

@@ -11,15 +11,17 @@
 
   let { note, onAction }: Props = $props();
 
-  const npub = nip19.npubEncode(note.pubkey);
-  const noteId = nip19.noteEncode(note.id);
-  const nevent = nip19.neventEncode({
-    id: note.id,
-    author: note.pubkey,
-    kind: note.kind,
-  });
+  let npub = $derived(nip19.npubEncode(note.pubkey));
+  let noteId = $derived(nip19.noteEncode(note.id));
+  let nevent = $derived(
+    nip19.neventEncode({
+      id: note.id,
+      author: note.pubkey,
+      kind: note.kind,
+    })
+  );
   const nosarayDuration = 10; // mins
-  const nosaraySince = new Date((note.created_at - (nosarayDuration / 2) * 60) * 1000);
+  let nosaraySince = $derived(new Date((note.created_at - (nosarayDuration / 2) * 60) * 1000));
 
   const handleCopy = (text: string) => {
     copyToClipboard(text);
