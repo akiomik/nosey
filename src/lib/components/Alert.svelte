@@ -7,16 +7,16 @@
 
   let { variant = '', icon, children }: Props = $props();
 
-  // NOTE: Dynamic class name does not seem to work
-  let className = $state('preset-tonal-surface');
-  switch (variant) {
-    case 'warning':
-      className = 'preset-tonal-warning';
-      break;
-    case 'error':
-      className = 'preset-tonal-error';
-      break;
-  }
+  let className = $derived.by(() => {
+    switch (variant) {
+      case 'warning':
+        return 'preset-tonal-warning';
+      case 'error':
+        return 'preset-tonal-error';
+      default:
+        return 'preset-tonal-surface';
+    }
+  });
 </script>
 
 <aside class={`card p-4 flex gap-2 items-center ${className}`}>
