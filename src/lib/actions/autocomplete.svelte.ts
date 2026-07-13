@@ -49,9 +49,8 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
 
   const menuProps = $state<{
     open: boolean;
-    anchorX: number;
-    anchorY: number;
     anchorElement: HTMLElement;
+    getAnchorRect: () => { x: number; y: number; width: number; height: number };
     loading: boolean;
     items: MentionItem[];
     activeIndex: number;
@@ -59,9 +58,8 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     onSelect: (item: MentionItem) => void;
   }>({
     open: false,
-    anchorX: 0,
-    anchorY: 0,
     anchorElement: node,
+    getAnchorRect: () => computeAnchorRect(),
     loading: false,
     items: [],
     activeIndex: 0,
@@ -99,6 +97,12 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     const borderLeft = Number.parseFloat(style.borderLeftWidth) || 0;
     const x = rect.left + borderLeft + paddingLeft + textWidth - input.scrollLeft;
     return { x, y: rect.bottom };
+  };
+
+  const computeAnchorRect = () => {
+    const caretIndex = node.selectionStart ?? node.value.length;
+    const { x, y } = getAnchorPosition(node, caretIndex);
+    return { x, y, width: 0, height: 0 };
   };
 
   const cancelPendingSearch = () => {
@@ -193,13 +197,6 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     node.focus();
   };
 
-  const updateAnchorPosition = () => {
-    const caretIndex = node.selectionStart ?? node.value.length;
-    const { x, y } = getAnchorPosition(node, caretIndex);
-    menuProps.anchorX = x;
-    menuProps.anchorY = y;
-  };
-
   const handleInput = () => {
     const caretIndex = node.selectionStart ?? node.value.length;
     const match = findTrigger(node.value.slice(0, caretIndex), prefix);
@@ -210,24 +207,10 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     }
 
     triggerStart = match.triggerStart;
-    updateAnchorPosition();
     menuProps.open = true;
     menuProps.activeIndex = 0;
 
     search(match.query);
-  };
-
-  // The anchor is a `position: fixed` element positioned in JS (there's no
-  // real DOM node at the caret to anchor to), so it doesn't move on its own
-  // when the page scrolls the way a normally-flowed anchor would. Without
-  // this, the menu stays glued to its last screen position instead of
-  // following the input.
-  const handleScroll = () => {
-    if (!menuProps.open) {
-      return;
-    }
-
-    updateAnchorPosition();
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -279,16 +262,12 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
   node.addEventListener('input', handleInput);
   node.addEventListener('keydown', handleKeydown);
   node.addEventListener('blur', handleBlur);
-  // `capture: true` so this also catches scrolling of ancestor containers
-  // (native `scroll` events don't bubble, only capture/target).
-  window.addEventListener('scroll', handleScroll, true);
 
   return {
     destroy() {
       node.removeEventListener('input', handleInput);
       node.removeEventListener('keydown', handleKeydown);
       node.removeEventListener('blur', handleBlur);
-      window.removeEventListener('scroll', handleScroll, true);
       cancelPendingSearch();
       unmount(menu);
       rxNostr.dispose();

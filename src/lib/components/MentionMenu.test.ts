@@ -15,8 +15,7 @@ const makeItem = (overrides: Partial<MentionItem> = {}): MentionItem => ({
 const baseProps = {
   open: true,
   onOpenChange: () => {},
-  anchorX: 0,
-  anchorY: 0,
+  getAnchorRect: () => ({ x: 0, y: 0, width: 0, height: 0 }),
   anchorElement: document.createElement('input'),
   onSelect: () => {},
 };
