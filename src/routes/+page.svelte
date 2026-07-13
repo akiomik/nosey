@@ -35,7 +35,7 @@
   };
 
   const handlePage = (newPage: number) => {
-    goto(`/?${new URLSearchParams({ q: query, page: newPage.toString() })}`);
+    goto(`/?${new URLSearchParams({ q, page: newPage.toString() })}`);
   };
 
   let q = $derived(data.q ?? '');
@@ -128,6 +128,7 @@
     pageSize={data.result.pagination.limit}
     page={data.page + 1}
     onPageChange={(e) => handlePage(e.page - 1)}
+    class="flex justify-center gap-1"
   >
     <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
     <Pagination.Context>
