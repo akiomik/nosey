@@ -11,3 +11,13 @@ class ResizeObserverStub {
 }
 
 globalThis.ResizeObserver ??= ResizeObserverStub;
+
+// jsdom doesn't implement canvas rendering, so HTMLCanvasElement#getContext
+// logs a "Not implemented" error and returns null. The autocomplete action
+// uses a canvas to measure text width and already falls back gracefully
+// when getContext returns null, but the console noise obscures real test
+// output, so stub a minimal 2D context here.
+HTMLCanvasElement.prototype.getContext = (() => ({
+  font: '',
+  measureText: (text: string) => ({ width: text.length }),
+})) as typeof HTMLCanvasElement.prototype.getContext;
