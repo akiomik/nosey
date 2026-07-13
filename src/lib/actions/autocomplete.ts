@@ -1,3 +1,4 @@
+import { verifier } from '@rx-nostr/crypto';
 import { encode } from 'html-entities';
 import { nip19 } from 'nostr-tools';
 import { createRxNostr, createRxOneshotReq, filterBy, latestEach, verify } from 'rx-nostr';
@@ -26,8 +27,8 @@ export const autocomplete = (node: HTMLElement, opts: Partial<Opts>) => {
 
   const asyncDisposer = import('tributejs')
     .then(({ default: Tribute }) => {
-      const rxNostr = createRxNostr();
-      rxNostr.switchRelays(opts.relays ?? []);
+      const rxNostr = createRxNostr({ verifier });
+      rxNostr.setDefaultRelays(opts.relays ?? []);
 
       // menuItemLimit is a supported Tribute option that's missing from the bundled types
       // (https://github.com/zurb/tribute/blob/5.1.3/src/Tribute.js#L26)
@@ -68,7 +69,7 @@ export const autocomplete = (node: HTMLElement, opts: Partial<Opts>) => {
             .use(req)
             .pipe(
               filterBy({ kinds: [0], search: text }),
-              verify(),
+              verify(verifier),
               latestEach(({ event }) => event.pubkey),
               map(({ event }) => event),
               toArray()
