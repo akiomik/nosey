@@ -1,4 +1,4 @@
-import urlRegexSafe from 'url-regex-safe';
+import { find } from 'linkifyjs';
 // import type { Action } from 'svelte/types/runtime/action';
 
 export type Opts = {
@@ -38,14 +38,11 @@ function uniq<T>(xs: T[]): T[] {
 export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
   const mergedOpts = { ...defaultOpts, ...opts };
 
-  const matches = node.innerHTML.matchAll(urlRegexSafe());
-  if (matches === null) {
-    return;
-  }
+  const matches = find(node.innerHTML, 'url');
 
   // TODO: traverse innerText of children
   let text = node.innerHTML;
-  uniq([...matches].map((m) => m[0])).forEach((match) => {
+  uniq(matches.map((m) => m.value)).forEach((match) => {
     const urlString = match;
     if (!mergedOpts.validate(urlString, mergedOpts.extPattern)) {
       return;
