@@ -3,6 +3,7 @@ import { createRxNostr, createRxOneshotReq, filterBy, verify, latestEach } from 
 import { map, toArray } from 'rxjs';
 import { encode } from 'html-entities';
 import { browser } from '$app/environment';
+import type { TributeOptions } from 'tributejs';
 
 export type Opts = {
   containerElement: HTMLElement;
@@ -28,7 +29,9 @@ export const autocomplete = (node: HTMLElement, opts: Partial<Opts>) => {
       const rxNostr = createRxNostr();
       rxNostr.switchRelays(opts.relays ?? []);
 
-      const tribute = new Tribute({
+      // menuItemLimit is a supported Tribute option that's missing from the bundled types
+      // (https://github.com/zurb/tribute/blob/5.1.3/src/Tribute.js#L26)
+      const tributeOptions: TributeOptions<Item> & { menuItemLimit: number } = {
         trigger: `${opts.prefix}@`,
         menuContainer: opts.containerElement,
         requireLeadingSpace: false,
@@ -82,7 +85,8 @@ export const autocomplete = (node: HTMLElement, opts: Partial<Opts>) => {
               callback(values);
             });
         },
-      });
+      };
+      const tribute = new Tribute(tributeOptions);
 
       tribute.attach(node);
 
