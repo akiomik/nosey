@@ -31,7 +31,7 @@
         <Portal>
           <Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
           <Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
-            <Dialog.Content>
+            <Dialog.Content class="w-full max-w-md mx-4">
               <AdvancedSearchModal
                 onClose={() => (isAdvancedSearchOpen = false)}
                 onSubmit={handleSubmit}

@@ -44,6 +44,13 @@
   let isInitial = $derived(q === '');
   let url = $derived(`https://nosey.vercel.app${isInitial ? '' : `/${params}`}`);
   $effect(() => {
+    // Resync the input's local edit buffer whenever the URL's `q` changes from
+    // somewhere other than this form (a link, pagination, browser back/forward).
+    // Without this, submitting the form again reuses whatever was last typed
+    // or submitted through it, not the query actually shown on screen.
+    query = data.q ?? '';
+  });
+  $effect(() => {
     console.debug('data', data);
   });
 </script>
@@ -71,7 +78,7 @@
 <form
   onsubmit={handleSearch}
   class="flex flex-col gap-6 justify-center items-center"
-  class:h-full={isInitial}
+  class:flex-1={isInitial}
 >
   {#if isInitial}
     <h1 class="h1">nosey</h1>
@@ -128,7 +135,7 @@
     pageSize={data.result.pagination.limit}
     page={data.page + 1}
     onPageChange={(e) => handlePage(e.page - 1)}
-    class="flex justify-center gap-1"
+    class="w-full flex justify-center gap-1"
   >
     <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
     <Pagination.Context>
