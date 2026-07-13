@@ -18,11 +18,13 @@
   };
 </script>
 
-<div class="card preset-filled-surface-100-900 p-2 w-52 z-20 shadow">
-  <ul class="list-nav">
+<div class="card preset-tonal-surface p-2 w-52 z-20 shadow">
+  <ul class="space-y-1">
     <li>
       <Dialog open={isAdvancedSearchOpen} onOpenChange={(d) => (isAdvancedSearchOpen = d.open)}>
-        <Dialog.Trigger class="w-full">
+        <Dialog.Trigger
+          class="block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal"
+        >
           <FontAwesomeIcon icon={faSearch} title="Open menu" class="w-4 inline mr-2" />
           Advanced search
         </Dialog.Trigger>

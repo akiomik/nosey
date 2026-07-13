@@ -31,7 +31,7 @@
     ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1'));
 </script>
 
-<div class="card preset-filled-surface-100-900">
+<div class="card preset-tonal-surface">
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">

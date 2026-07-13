@@ -14,7 +14,7 @@
 </script>
 
 <div class="h-full overflow-hidden flex flex-col">
-  <header class="sticky top-0 z-10">
+  <header>
     <Header />
   </header>
 
@@ -27,7 +27,7 @@
   {/if}
 
   <main class="flex-1 overflow-y-auto">
-    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4">
+    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4 h-full">
       {@render children?.()}
     </div>
   </main>

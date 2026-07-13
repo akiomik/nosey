@@ -80,10 +80,11 @@
 
   <div bind:this={inputContainer} class="relative w-full">
     {#if inputContainer}
-      <div class="input-group input-group-divider grid-cols-[1fr_auto]">
+      <div class="input-group grid-cols-[1fr_auto]">
         <!-- svelte-ignore a11y_autofocus -->
         <input
           type="search"
+          class="ig-input"
           value={q}
           aria-label="search"
           oninput={handleQuery}
@@ -94,7 +95,7 @@
           }}
           autofocus
         />
-        <button type="submit" class="btn preset-filled-primary-500">
+        <button type="submit" class="ig-btn preset-filled-primary-500">
           <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
         </button>
       </div>

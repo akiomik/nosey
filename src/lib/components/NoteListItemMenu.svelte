@@ -25,38 +25,45 @@
     copyToClipboard(text);
     onAction();
   };
+
+  const itemClass = 'block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal';
 </script>
 
-<div class="card preset-filled-surface-100-900 p-2 w-64 z-20 shadow">
-  <ul class="list-nav">
+<div class="card preset-tonal-surface p-2 w-64 z-20 shadow">
+  <ul class="space-y-1">
     <li>
-      <button type="button" class="w-full" onclick={() => handleCopy(npub)}>
+      <button type="button" class={itemClass} onclick={() => handleCopy(npub)}>
         Copy <code class="code ml-1">npub1</code>
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => handleCopy(noteId)}>
+      <button type="button" class={itemClass} onclick={() => handleCopy(noteId)}>
         Copy <code class="code mx-1">note1</code> id
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => handleCopy(nevent)}>
+      <button type="button" class={itemClass} onclick={() => handleCopy(nevent)}>
         Copy <code class="code mx-1">nevent1</code> id
       </button>
     </li>
     <li>
-      <button type="button" class="w-full" onclick={() => handleCopy(note.content)}>
+      <button type="button" class={itemClass} onclick={() => handleCopy(note.content)}>
         Copy text
       </button>
     </li>
     <li>
-      <ExternalLink href="https://njump.me/{npub}">Open author with njump.me</ExternalLink>
+      <ExternalLink class={itemClass} href="https://njump.me/{npub}">
+        Open author with njump.me
+      </ExternalLink>
     </li>
     <li>
-      <ExternalLink href="https://njump.me/{nevent}">Open note with njump.me</ExternalLink>
+      <ExternalLink class={itemClass} href="https://njump.me/{nevent}">
+        Open note with njump.me
+      </ExternalLink>
     </li>
     <li>
       <ExternalLink
+        class={itemClass}
         href="https://nosaray.vercel.app/?since={nosaraySince.toISOString()}&dur={nosarayDuration}m"
       >
         See posts around this on Nosaray
