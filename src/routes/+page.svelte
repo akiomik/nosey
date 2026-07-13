@@ -5,7 +5,7 @@
   import { untrack } from 'svelte';
 
   import { goto } from '$app/navigation';
-  import { autocomplete } from '$lib/actions/autocomplete';
+  import { autocomplete } from '$lib/actions/autocomplete.svelte';
   import Alert from '$lib/components/Alert.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
   import NoteList from '$lib/components/NoteList.svelte';
@@ -17,7 +17,6 @@
 
   let { data }: Props = $props();
 
-  let inputContainer: HTMLDivElement | undefined = $state();
   // Only the initial value matters here; the `$effect` below keeps this in
   // sync with `data.q` afterwards, so `data` doesn't need to be tracked.
   let query = untrack(() => data.q ?? '');
@@ -88,28 +87,25 @@
     <p>A nostr searcher</p>
   {/if}
 
-  <div bind:this={inputContainer} class="relative w-full">
-    {#if inputContainer}
-      <div class="input-group grid-cols-[1fr_auto]">
-        <!-- svelte-ignore a11y_autofocus -->
-        <input
-          type="search"
-          class="ig-input"
-          value={q}
-          aria-label="search"
-          oninput={handleQuery}
-          use:autocomplete={{
-            containerElement: inputContainer,
-            relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
-            prefix: 'from:',
-          }}
-          autofocus
-        />
-        <button type="submit" class="ig-btn preset-filled-primary-500">
-          <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
-        </button>
-      </div>
-    {/if}
+  <div class="relative w-full">
+    <div class="input-group grid-cols-[1fr_auto]">
+      <!-- svelte-ignore a11y_autofocus -->
+      <input
+        type="search"
+        class="ig-input"
+        value={q}
+        aria-label="search"
+        oninput={handleQuery}
+        use:autocomplete={{
+          relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
+          prefix: 'from:',
+        }}
+        autofocus
+      />
+      <button type="submit" class="ig-btn preset-filled-primary-500">
+        <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
+      </button>
+    </div>
   </div>
 
   {#if isInitial}

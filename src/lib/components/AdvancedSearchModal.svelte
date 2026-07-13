@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { autocomplete } from '$lib/actions/autocomplete';
+  import { autocomplete } from '$lib/actions/autocomplete.svelte';
   import type { AdvancedSearchFormData } from '$lib/types';
 
   interface Props {
@@ -8,8 +8,6 @@
   }
 
   let { onClose, onSubmit }: Props = $props();
-
-  let authorContainer: HTMLDivElement | undefined = $state();
 
   // TODO: Support current query
   const formData: AdvancedSearchFormData = $state({
@@ -40,20 +38,17 @@
     </label>
     <label class="label">
       <span>Author</span>
-      <div bind:this={authorContainer} class="relative w-full">
-        {#if authorContainer}
-          <input
-            class="input"
-            type="text"
-            bind:value={formData.from}
-            placeholder="npub1..."
-            use:autocomplete={{
-              containerElement: authorContainer,
-              relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
-              prefix: '',
-            }}
-          />
-        {/if}
+      <div class="relative w-full">
+        <input
+          class="input"
+          type="text"
+          bind:value={formData.from}
+          placeholder="npub1..."
+          use:autocomplete={{
+            relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
+            prefix: '',
+          }}
+        />
       </div>
     </label>
     <label class="label">
