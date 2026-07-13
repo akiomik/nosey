@@ -8,6 +8,17 @@ import { browser } from '$app/environment';
 import MentionMenu from '$lib/components/MentionMenu.svelte';
 import type { MentionItem } from '$lib/types';
 
+// This intentionally hand-rolls keyboard navigation instead of using
+// @skeletonlabs/skeleton-svelte's `Menu` or `Combobox` (both wrap @zag-js
+// machines):
+// - `Menu`'s keyboard handling lives on its own trigger/content DOM nodes;
+//   selecting an item highlighted via ArrowDown/Up calls `itemEl.click()` on
+//   that node, not on this action's `<input>`, so focus would have to leave
+//   the input to drive it.
+// - `Combobox` owns `inputValue`/`value` for the whole input and replaces it
+//   wholesale on selection, but here the input holds a full note being
+//   composed and only the `prefix@query` substring after the trigger should
+//   ever be replaced -- the rest of the buffer must survive untouched.
 export type Opts = {
   relays: string[];
   prefix: string;

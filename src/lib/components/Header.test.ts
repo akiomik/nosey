@@ -12,34 +12,34 @@ afterEach(() => {
 });
 
 describe('Header', () => {
-  it('opens the hamburger Popover, and opening the nested Advanced Search Dialog closes it', async () => {
+  it('opens the hamburger Menu, and selecting the Advanced Search item opens the Dialog and closes the Menu', async () => {
     new WS('wss://search.nos.today');
     new WS('wss://relay.nostr.band');
 
     const { container } = render(Header);
 
-    const popoverTrigger = container.querySelector(
-      '[data-scope="popover"][data-part="trigger"]'
+    const menuTrigger = container.querySelector(
+      '[data-scope="menu"][data-part="trigger"]'
     ) as HTMLElement;
-    const popoverContent = document.querySelector(
-      '[data-scope="popover"][data-part="content"]'
+    const menuContent = document.querySelector(
+      '[data-scope="menu"][data-part="content"]'
     ) as HTMLElement;
     const dialogContent = document.querySelector(
       '[data-scope="dialog"][data-part="content"]'
     ) as HTMLElement;
 
-    expect(popoverContent).toHaveAttribute('hidden');
+    expect(menuContent).toHaveAttribute('hidden');
     expect(dialogContent).toHaveAttribute('hidden');
 
-    await fireEvent.click(popoverTrigger);
-    expect(popoverContent).not.toHaveAttribute('hidden');
+    await fireEvent.click(menuTrigger);
+    expect(menuContent).not.toHaveAttribute('hidden');
 
-    const dialogTrigger = document.querySelector(
-      '[data-scope="dialog"][data-part="trigger"]'
+    const advancedSearchItem = document.querySelector(
+      '[data-scope="menu"][data-part="item"][data-value="advanced-search"]'
     ) as HTMLElement;
-    await fireEvent.click(dialogTrigger);
+    await fireEvent.click(advancedSearchItem);
 
     expect(dialogContent).not.toHaveAttribute('hidden');
-    expect(popoverContent).toHaveAttribute('hidden');
+    expect(menuContent).toHaveAttribute('hidden');
   });
 });
