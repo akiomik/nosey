@@ -1,9 +1,6 @@
-export function buildQuery(form: {
-  keyword: string;
-  from: string;
-  since: string;
-  until: string;
-}): string {
+import type { AdvancedSearchFormData } from '$lib/types';
+
+export function buildQuery(form: AdvancedSearchFormData): string {
   let query = '';
   if (form.keyword) {
     query = form.keyword.trim();

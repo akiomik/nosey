@@ -1,27 +1,28 @@
 <script lang="ts">
   import { faBars } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
-  import { AppBar, popup } from '@skeletonlabs/skeleton';
+  import { AppBar, Popover, Portal } from '@skeletonlabs/skeleton-svelte';
   import HeaderMenu from './HeaderMenu.svelte';
-
-  const popupTargetId = 'header-menu';
-  const menuPopup: PopupSettings = {
-    event: 'click',
-    target: popupTargetId,
-    placement: 'bottom',
-  };
 </script>
 
-<AppBar slotTrail="place-content-end">
-  <a href="/">nosey</a>
-  {#snippet trail()}
-  
-      <button type="button" class="btn-icon" use:popup={menuPopup}>
-        <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
-      </button>
-    
-  {/snippet}
+<AppBar>
+  <AppBar.Toolbar>
+    <AppBar.Lead>
+      <a href="/">nosey</a>
+    </AppBar.Lead>
+    <AppBar.Trail class="place-content-end">
+      <Popover positioning={{ placement: 'bottom' }}>
+        <Popover.Trigger class="btn-icon">
+          <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
+        </Popover.Trigger>
+        <Portal>
+          <Popover.Positioner class="z-20">
+            <Popover.Content>
+              <HeaderMenu />
+            </Popover.Content>
+          </Popover.Positioner>
+        </Portal>
+      </Popover>
+    </AppBar.Trail>
+  </AppBar.Toolbar>
 </AppBar>
-
-<HeaderMenu popupId={popupTargetId} />
