@@ -1,6 +1,7 @@
 import { verifier } from '@rx-nostr/crypto';
 import { nip19 } from 'nostr-tools';
 import { createRxNostr, createRxOneshotReq, filterBy, latestEach, verify } from 'rx-nostr';
+import type { Subscription } from 'rxjs';
 import { map, toArray } from 'rxjs';
 import { mount, unmount } from 'svelte';
 import { browser } from '$app/environment';
@@ -13,6 +14,8 @@ export type Opts = {
 };
 
 const TRIGGER_SUFFIX = '@';
+const MENU_ITEM_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 250;
 
 const findTrigger = (textBeforeCaret: string, prefix: string) => {
   const trigger = `${prefix}${TRIGGER_SUFFIX}`;
@@ -41,6 +44,8 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
   let triggerStart: number | null = null;
   let searchToken = 0;
   let measureCanvas: HTMLCanvasElement | null = null;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let activeSubscription: Subscription | null = null;
 
   const menuProps = $state<{
     open: boolean;
@@ -96,7 +101,19 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     return { x, y: rect.bottom };
   };
 
+  const cancelPendingSearch = () => {
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    if (activeSubscription) {
+      activeSubscription.unsubscribe();
+      activeSubscription = null;
+    }
+  };
+
   const closeMenu = () => {
+    cancelPendingSearch();
     menuProps.open = false;
     menuProps.items = [];
     menuProps.activeIndex = 0;
@@ -105,7 +122,19 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     searchToken += 1;
   };
 
+  const parseMentionItem = (pubkey: string, content: string): MentionItem => {
+    try {
+      const { name, display_name: displayName, picture, nip05 } = JSON.parse(content);
+      return { pubkey, content, name: name ?? displayName ?? pubkey, picture, nip05 };
+    } catch {
+      // Malformed profile content (e.g. a kind:0 event with invalid JSON) shouldn't
+      // crash the search subscription and leave the menu stuck on "Searching...".
+      return { pubkey, content, name: pubkey, picture: '', nip05: '' };
+    }
+  };
+
   const search = (query: string) => {
+    cancelPendingSearch();
     const token = ++searchToken;
 
     if (query === '') {
@@ -116,28 +145,33 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
 
     menuProps.loading = true;
 
-    const req = createRxOneshotReq({ filters: [{ kinds: [0], search: query, limit: 10 }] });
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
 
-    rxNostr
-      .use(req)
-      .pipe(
-        filterBy({ kinds: [0], search: query }),
-        verify(verifier),
-        latestEach(({ event }) => event.pubkey),
-        map(({ event }) => event),
-        toArray()
-      )
-      .subscribe((events) => {
-        if (token !== searchToken) {
-          return;
-        }
+      const req = createRxOneshotReq({ filters: [{ kinds: [0], search: query, limit: 10 }] });
 
-        menuProps.items = events.map(({ pubkey, content }) => {
-          const { name, display_name: displayName, picture, nip05 } = JSON.parse(content);
-          return { pubkey, content, name: name ?? displayName ?? pubkey, picture, nip05 };
+      activeSubscription = rxNostr
+        .use(req)
+        .pipe(
+          filterBy({ kinds: [0], search: query }),
+          verify(verifier),
+          latestEach(({ event }) => event.pubkey),
+          map(({ event }) => event),
+          toArray()
+        )
+        .subscribe((events) => {
+          activeSubscription = null;
+
+          if (token !== searchToken) {
+            return;
+          }
+
+          menuProps.items = events
+            .map(({ pubkey, content }) => parseMentionItem(pubkey, content))
+            .slice(0, MENU_ITEM_LIMIT);
+          menuProps.loading = false;
         });
-        menuProps.loading = false;
-      });
+    }, SEARCH_DEBOUNCE_MS);
   };
 
   const selectItem = (item: MentionItem) => {
@@ -255,6 +289,7 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
       node.removeEventListener('keydown', handleKeydown);
       node.removeEventListener('blur', handleBlur);
       window.removeEventListener('scroll', handleScroll, true);
+      cancelPendingSearch();
       unmount(menu);
       rxNostr.dispose();
     },

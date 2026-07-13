@@ -10,16 +10,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import WS from 'vitest-websocket-mock';
 import { autocomplete } from './autocomplete.svelte';
 
-const RELAY_URLS = ['wss://search.nos.today', 'wss://relay.nostr.band'];
+const RELAY_URLS: [string, string] = ['wss://search.nos.today', 'wss://relay.nostr.band'];
 
-const respondWithProfile = async (relays: WS[], content: Record<string, unknown>) => {
+const respondWithRawContent = async (relays: WS[], content: string) => {
   const sk = generateSecretKey();
   const pubkey = getPublicKey(sk);
   const template: EventTemplate = {
     kind: 0,
     created_at: Math.floor(Date.now() / 1000),
     tags: [],
-    content: JSON.stringify(content),
+    content,
   };
   const event = finalizeEvent(template, sk);
 
@@ -32,6 +32,35 @@ const respondWithProfile = async (relays: WS[], content: Record<string, unknown>
   }
 
   return { pubkey, event };
+};
+
+const respondWithProfile = (relays: WS[], content: Record<string, unknown>) =>
+  respondWithRawContent(relays, JSON.stringify(content));
+
+// Sends `count` distinct-pubkey kind:0 events to a single relay in response to
+// the one REQ it's expected to receive, then closes the subscription.
+const respondWithProfiles = async (relay: WS, count: number) => {
+  await relay.connected;
+  const raw = await relay.nextMessage;
+  const [, subId] = JSON.parse(raw as string);
+
+  const pubkeys: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const sk = generateSecretKey();
+    const pubkey = getPublicKey(sk);
+    pubkeys.push(pubkey);
+    const template: EventTemplate = {
+      kind: 0,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [],
+      content: JSON.stringify({ name: `user-${i}` }),
+    };
+    const event = finalizeEvent(template, sk);
+    relay.send(JSON.stringify(['EVENT', subId, event]));
+  }
+  relay.send(JSON.stringify(['EOSE', subId]));
+
+  return pubkeys;
 };
 
 const getMenuContent = () =>
@@ -103,4 +132,85 @@ describe('autocomplete', () => {
 
     action?.destroy();
   });
+
+  it('recovers from a profile event with invalid JSON content instead of getting stuck loading', async () => {
+    const relays = RELAY_URLS.map((url) => new WS(url));
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { relays: RELAY_URLS, prefix: 'from:' });
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    const { pubkey } = await respondWithRawContent(relays, '{not valid json');
+
+    await vi.waitFor(() => {
+      expect(getMenuContent()).not.toHaveAttribute('hidden');
+      expect(getMenuContent()?.textContent).not.toContain('Searching...');
+    });
+
+    // Falls back to the raw pubkey as the display name instead of throwing and
+    // leaving the menu stuck on "Searching...".
+    expect(getMenuContent()?.textContent).toContain(pubkey);
+
+    action?.destroy();
+  }, 15000);
+
+  it('caps merged results from multiple relays at 10 items', async () => {
+    const relays = RELAY_URLS.map((url) => new WS(url));
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { relays: RELAY_URLS, prefix: 'from:' });
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    await Promise.all(relays.map((relay) => respondWithProfiles(relay, 6)));
+
+    await vi.waitFor(() => {
+      expect(getMenuContent()?.querySelectorAll('button').length).toBe(10);
+    });
+
+    action?.destroy();
+  }, 15000);
+
+  it('debounces input so only the final query reaches the relay', async () => {
+    const [relayUrl] = RELAY_URLS;
+    const relay = new WS(relayUrl);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { relays: [relayUrl], prefix: 'from:' });
+
+    input.value = 'from:@b';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    // Type the rest before the debounce timer fires; the first keystroke's
+    // search must never reach the relay.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    await relay.connected;
+    const raw = await relay.nextMessage;
+    const [type, subId, filter] = JSON.parse(raw as string);
+    expect(type).toBe('REQ');
+    expect(filter.search).toBe('bob');
+
+    relay.send(JSON.stringify(['EOSE', subId]));
+
+    await vi.waitFor(() => {
+      const reqMessages = relay.messages.filter((m) => JSON.parse(m as string)[0] === 'REQ');
+      expect(reqMessages).toHaveLength(1);
+    });
+
+    action?.destroy();
+  }, 15000);
 });
