@@ -10,9 +10,13 @@
   import NoteList from '$lib/components/NoteList.svelte';
   import type { PageData } from '$lib/types';
 
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let inputContainer: HTMLDivElement;
+  let { data }: Props = $props();
+
+  let inputContainer: HTMLDivElement | undefined = $state();
   let query = data.q ?? '';
 
   const mattnQuery = 'from:npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
@@ -34,14 +38,14 @@
     goto(`/?${new URLSearchParams({ q: query, page: e.detail })}`);
   };
 
-  $: q = data.q ?? '';
-  $: page = data.page === 0 ? undefined : data.page;
-  $: params = page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q });
-  $: isInitial = q === '';
-  $: url = `https://nosey.vercel.app${isInitial ? '' : `/${params}`}`;
-  $: {
+  let q = $derived(data.q ?? '');
+  let page = $derived(data.page === 0 ? undefined : data.page);
+  let params = $derived(page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q }));
+  let isInitial = $derived(q === '');
+  let url = $derived(`https://nosey.vercel.app${isInitial ? '' : `/${params}`}`);
+  $effect(() => {
     console.debug('data', data);
-  }
+  });
 </script>
 
 <svelte:head>
@@ -65,7 +69,7 @@
 </svelte:head>
 
 <form
-  on:submit={handleSearch}
+  onsubmit={handleSearch}
   class="flex flex-col gap-6 justify-center items-center"
   class:h-full={isInitial}
 >
@@ -77,12 +81,12 @@
   <div bind:this={inputContainer} class="relative w-full">
     {#if inputContainer}
       <div class="input-group input-group-divider grid-cols-[1fr_auto]">
-        <!-- svelte-ignore a11y-autofocus -->
+        <!-- svelte-ignore a11y_autofocus -->
         <input
           type="search"
           value={q}
           aria-label="search"
-          on:input={handleQuery}
+          oninput={handleQuery}
           use:autocomplete={{
             containerElement: inputContainer,
             relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],

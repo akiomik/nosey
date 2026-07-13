@@ -4,8 +4,12 @@
   import type * as Nostr from 'nostr-typedef';
   import ExternalLink from './ExternalLink.svelte';
 
-  export let note: Nostr.Event;
-  export let popupId: string;
+  interface Props {
+    note: Nostr.Event;
+    popupId: string;
+  }
+
+  let { note, popupId }: Props = $props();
 
   const npub = nip19.npubEncode(note.pubkey);
   const noteId = nip19.noteEncode(note.id);

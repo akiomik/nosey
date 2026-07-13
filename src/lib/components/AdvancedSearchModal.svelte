@@ -3,18 +3,22 @@
   import type { SvelteComponent } from 'svelte';
   import { autocomplete } from '$lib/actions/autocomplete';
 
-  export let parent: SvelteComponent;
+  interface Props {
+    parent: SvelteComponent;
+  }
+
+  let { parent }: Props = $props();
 
   const modalStore = getModalStore();
-  let authorContainer: HTMLDivElement;
+  let authorContainer: HTMLDivElement | undefined = $state();
 
   // TODO: Support current query
-  const formData = {
+  const formData = $state({
     keyword: undefined,
     from: undefined,
     since: undefined,
     until: undefined,
-  };
+  });
 
   const onFormSubmit = (e: Event) => {
     e.preventDefault();
@@ -31,7 +35,7 @@
   <div class="card p-4 w-modal shadow-xl space-y-4">
     <header class="text-2xl font-bold">Advanced search</header>
 
-    <form class="p-4 space-y-4 rounded-container-token" on:submit={onFormSubmit}>
+    <form class="p-4 space-y-4 rounded-container-token" onsubmit={onFormSubmit}>
       <label class="label">
         <span>Keywords</span>
         <input
@@ -72,10 +76,10 @@
     </form>
 
     <footer class="modal-footer {parent.regionFooter}">
-      <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>
+      <button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
         {parent.buttonTextCancel}
       </button>
-      <button type="button" class="btn {parent.buttonPositive}" on:click={onFormSubmit}>Search</button>
+      <button type="button" class="btn {parent.buttonPositive}" onclick={onFormSubmit}>Search</button>
     </footer>
   </div>
 {/if}

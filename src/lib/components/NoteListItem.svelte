@@ -8,8 +8,12 @@
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
 
-  export let note: Nostr.Event;
-  export let profile: Nostr.Event;
+  interface Props {
+    note: Nostr.Event;
+    profile: Nostr.Event;
+  }
+
+  let { note, profile }: Props = $props();
 
   const popupTargetId = `menu-${note.id}`;
   const menuPopup: PopupSettings = {
@@ -19,17 +23,17 @@
   };
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
 
-  $: profileContent = profile ? JSON.parse(profile.content) : undefined;
-  $: displayName =
-    profileContent && profileContent.display_name ? profileContent.display_name : undefined;
-  $: profileName = profileContent && profileContent.name ? profileContent.name : undefined;
-  $: nameOrPubkey = displayName ?? profileName ?? shorten(note.pubkey);
+  let profileContent = $derived(profile ? JSON.parse(profile.content) : undefined);
+  let displayName =
+    $derived(profileContent && profileContent.display_name ? profileContent.display_name : undefined);
+  let profileName = $derived(profileContent && profileContent.name ? profileContent.name : undefined);
+  let nameOrPubkey = $derived(displayName ?? profileName ?? shorten(note.pubkey));
 
-  $: noteContent = note.content
+  let noteContent = $derived(note.content
     ?.replaceAll(/nostr:npub1([a-z0-9]{58})/g, '@npub1$1')
     ?.replaceAll(/nostr:nprofile1([a-z0-9]{61,})/g, '@nprofile1$1')
     ?.replaceAll(/nostr:note1([a-z0-9]{58})/g, '@note1$1')
-    ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1');
+    ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1'));
 </script>
 
 <div class="card">
