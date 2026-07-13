@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Paginator } from '@skeletonlabs/skeleton';
+  import { Pagination } from '@skeletonlabs/skeleton-svelte';
 
   import { goto } from '$app/navigation';
   import { autocomplete } from '$lib/actions/autocomplete';
@@ -34,8 +34,8 @@
     goto(`/?${new URLSearchParams({ q: query })}`);
   };
 
-  const handlePage = (e: CustomEvent) => {
-    goto(`/?${new URLSearchParams({ q: query, page: e.detail })}`);
+  const handlePage = (newPage: number) => {
+    goto(`/?${new URLSearchParams({ q, page: newPage.toString() })}`);
   };
 
   let q = $derived(data.q ?? '');
@@ -43,6 +43,13 @@
   let params = $derived(page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q }));
   let isInitial = $derived(q === '');
   let url = $derived(`https://nosey.vercel.app${isInitial ? '' : `/${params}`}`);
+  $effect(() => {
+    // Resync the input's local edit buffer whenever the URL's `q` changes from
+    // somewhere other than this form (a link, pagination, browser back/forward).
+    // Without this, submitting the form again reuses whatever was last typed
+    // or submitted through it, not the query actually shown on screen.
+    query = data.q ?? '';
+  });
   $effect(() => {
     console.debug('data', data);
   });
@@ -71,7 +78,7 @@
 <form
   onsubmit={handleSearch}
   class="flex flex-col gap-6 justify-center items-center"
-  class:h-full={isInitial}
+  class:flex-1={isInitial}
 >
   {#if isInitial}
     <h1 class="h1">nosey</h1>
@@ -80,10 +87,11 @@
 
   <div bind:this={inputContainer} class="relative w-full">
     {#if inputContainer}
-      <div class="input-group input-group-divider grid-cols-[1fr_auto]">
+      <div class="input-group grid-cols-[1fr_auto]">
         <!-- svelte-ignore a11y_autofocus -->
         <input
           type="search"
+          class="ig-input"
           value={q}
           aria-label="search"
           oninput={handleQuery}
@@ -94,7 +102,7 @@
           }}
           autofocus
         />
-        <button type="submit" class="variant-filled-primary">
+        <button type="submit" class="ig-btn preset-filled-primary-500">
           <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
         </button>
       </div>
@@ -122,13 +130,27 @@
 
 {#if data.result}
   <NoteList notes={data.result.data} />
-  <Paginator
-    settings={{
-      page: data.page,
-      size: data.result.pagination.total_records,
-      limit: data.result.pagination.limit,
-      amounts: [data.result.pagination.limit],
-    }}
-    on:page={handlePage}
-  />
+  {#if data.result.pagination.total_records > 0}
+    <Pagination
+      count={data.result.pagination.total_records}
+      pageSize={data.result.pagination.limit}
+      page={data.page + 1}
+      onPageChange={(e) => handlePage(e.page - 1)}
+      class="mx-auto w-fit flex gap-1"
+    >
+      <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
+      <Pagination.Context>
+        {#snippet children(pagination)}
+          {#each pagination().pages as p, i}
+            {#if p.type === 'page'}
+              <Pagination.Item {...p} class="btn-icon">{p.value}</Pagination.Item>
+            {:else}
+              <Pagination.Ellipsis index={i} class="btn-icon">&hellip;</Pagination.Ellipsis>
+            {/if}
+          {/each}
+        {/snippet}
+      </Pagination.Context>
+      <Pagination.NextTrigger class="btn-icon">&rarr;</Pagination.NextTrigger>
+    </Pagination>
+  {/if}
 {/if}

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
-  import { Avatar, popup } from '@skeletonlabs/skeleton';
+  import { Avatar, Popover, Portal } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
@@ -15,12 +14,8 @@
 
   let { note, profile }: Props = $props();
 
-  const popupTargetId = `menu-${note.id}`;
-  const menuPopup: PopupSettings = {
-    event: 'click',
-    target: popupTargetId,
-    placement: 'bottom',
-  };
+  let isMenuOpen = $state(false);
+
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
 
   let profileContent = $derived(profile ? JSON.parse(profile.content) : undefined);
@@ -36,27 +31,37 @@
     ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1'));
 </script>
 
-<div class="card">
+<div class="card preset-tonal-surface">
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
-        <Avatar
-          src={profileContent?.picture}
-          initials="NO"
-          alt="Profile picture of {nameOrPubkey}"
-        />
+        <Avatar>
+          <Avatar.Image src={profileContent?.picture} alt="Profile picture of {nameOrPubkey}" />
+          <Avatar.Fallback>NO</Avatar.Fallback>
+        </Avatar>
       </div>
 
       <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">
         {nameOrPubkey}
       </p>
 
-      <button type="button" class="btn-icon flex-none" use:popup={menuPopup}>
-        <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
-      </button>
+      <Popover
+        positioning={{ placement: 'bottom' }}
+        open={isMenuOpen}
+        onOpenChange={(d) => (isMenuOpen = d.open)}
+      >
+        <Popover.Trigger class="btn-icon flex-none">
+          <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
+        </Popover.Trigger>
+        <Portal>
+          <Popover.Positioner>
+            <Popover.Content class="z-20">
+              <NoteListItemMenu {note} onAction={() => (isMenuOpen = false)} />
+            </Popover.Content>
+          </Popover.Positioner>
+        </Portal>
+      </Popover>
     </div>
-
-    <NoteListItemMenu {note} popupId={popupTargetId} />
 
     <p
       use:inlineImage={{

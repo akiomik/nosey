@@ -39,3 +39,10 @@ export type Profile = Partial<{
   display_name: string;
   name: string;
 }>;
+
+export type AdvancedSearchFormData = {
+  keyword: string;
+  from: string;
+  since: string;
+  until: string;
+};

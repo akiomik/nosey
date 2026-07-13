@@ -1,27 +1,34 @@
 <script lang="ts">
   import { faBars } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
-  import { AppBar, popup } from '@skeletonlabs/skeleton';
+  import { AppBar, Popover, Portal } from '@skeletonlabs/skeleton-svelte';
   import HeaderMenu from './HeaderMenu.svelte';
 
-  const popupTargetId = 'header-menu';
-  const menuPopup: PopupSettings = {
-    event: 'click',
-    target: popupTargetId,
-    placement: 'bottom',
-  };
+  let isMenuOpen = $state(false);
 </script>
 
-<AppBar slotTrail="place-content-end">
-  <a href="/">nosey</a>
-  {#snippet trail()}
-  
-      <button type="button" class="btn-icon" use:popup={menuPopup}>
-        <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
-      </button>
-    
-  {/snippet}
+<AppBar class="bg-surface-50-950 shadow-sm">
+  <AppBar.Toolbar class="flex items-center justify-between p-4">
+    <AppBar.Lead>
+      <a href="/">nosey</a>
+    </AppBar.Lead>
+    <AppBar.Trail class="flex items-center justify-end">
+      <Popover
+        positioning={{ placement: 'bottom' }}
+        open={isMenuOpen}
+        onOpenChange={(d) => (isMenuOpen = d.open)}
+      >
+        <Popover.Trigger class="btn-icon">
+          <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
+        </Popover.Trigger>
+        <Portal>
+          <Popover.Positioner>
+            <Popover.Content class="z-20">
+              <HeaderMenu onAdvancedSearchOpen={() => (isMenuOpen = false)} />
+            </Popover.Content>
+          </Popover.Positioner>
+        </Portal>
+      </Popover>
+    </AppBar.Trail>
+  </AppBar.Toolbar>
 </AppBar>
-
-<HeaderMenu popupId={popupTargetId} />
