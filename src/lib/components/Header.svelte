@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faBars } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { AppBar, Popover, Portal } from '@skeletonlabs/skeleton-svelte';
+  import { AppBar, Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import HeaderMenu from './HeaderMenu.svelte';
 
   let isMenuOpen = $state(false);
@@ -13,22 +13,22 @@
       <a href="/">nosey</a>
     </AppBar.Lead>
     <AppBar.Trail class="flex items-center justify-end">
-      <Popover
+      <Menu
         positioning={{ placement: 'bottom' }}
         open={isMenuOpen}
         onOpenChange={(d) => (isMenuOpen = d.open)}
       >
-        <Popover.Trigger class="btn-icon">
+        <Menu.Trigger class="btn-icon">
           <FontAwesomeIcon icon={faBars} title="Open menu" class="w-4" />
-        </Popover.Trigger>
+        </Menu.Trigger>
         <Portal>
-          <Popover.Positioner>
-            <Popover.Content class="z-20">
-              <HeaderMenu onAdvancedSearchOpen={() => (isMenuOpen = false)} />
-            </Popover.Content>
-          </Popover.Positioner>
+          <Menu.Positioner>
+            <Menu.Content class="card preset-tonal-surface p-2 w-52 z-20 shadow space-y-1">
+              <HeaderMenu />
+            </Menu.Content>
+          </Menu.Positioner>
         </Portal>
-      </Popover>
+      </Menu>
     </AppBar.Trail>
   </AppBar.Toolbar>
 </AppBar>

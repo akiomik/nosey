@@ -1,17 +1,11 @@
 <script lang="ts">
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Dialog, Portal } from '@skeletonlabs/skeleton-svelte';
+  import { Dialog, Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import { goto } from '$app/navigation';
   import { buildQuery } from '$lib/helpers/buildQuery';
   import type { AdvancedSearchFormData } from '$lib/types';
   import AdvancedSearchModal from './AdvancedSearchModal.svelte';
-
-  interface Props {
-    onAdvancedSearchOpen: () => void;
-  }
-
-  let { onAdvancedSearchOpen }: Props = $props();
 
   let isAdvancedSearchOpen = $state(false);
 
@@ -22,37 +16,24 @@
     goto(`/?${new URLSearchParams({ q: query })}`);
     isAdvancedSearchOpen = false;
   };
-
-  const handleDialogOpenChange = (d: { open: boolean }) => {
-    isAdvancedSearchOpen = d.open;
-    if (d.open) {
-      onAdvancedSearchOpen();
-    }
-  };
 </script>
 
-<div class="card preset-tonal-surface p-2 w-52 z-20 shadow">
-  <ul class="space-y-1">
-    <li>
-      <Dialog open={isAdvancedSearchOpen} onOpenChange={handleDialogOpenChange}>
-        <Dialog.Trigger
-          class="block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal"
-        >
-          <FontAwesomeIcon icon={faSearch} title="Open menu" class="w-4 inline mr-2" />
-          Advanced search
-        </Dialog.Trigger>
-        <Portal>
-          <Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
-          <Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
-            <Dialog.Content class="w-full max-w-md mx-4">
-              <AdvancedSearchModal
-                onClose={() => (isAdvancedSearchOpen = false)}
-                onSubmit={handleSubmit}
-              />
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog>
-    </li>
-  </ul>
-</div>
+<Menu.Item
+  value="advanced-search"
+  onclick={() => (isAdvancedSearchOpen = true)}
+  class="block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal"
+>
+  <FontAwesomeIcon icon={faSearch} title="Open menu" class="w-4 inline mr-2" />
+  Advanced search
+</Menu.Item>
+
+<Dialog open={isAdvancedSearchOpen} onOpenChange={(d) => (isAdvancedSearchOpen = d.open)}>
+  <Portal>
+    <Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
+    <Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
+      <Dialog.Content class="w-full max-w-md mx-4">
+        <AdvancedSearchModal onClose={() => (isAdvancedSearchOpen = false)} onSubmit={handleSubmit} />
+      </Dialog.Content>
+    </Dialog.Positioner>
+  </Portal>
+</Dialog>

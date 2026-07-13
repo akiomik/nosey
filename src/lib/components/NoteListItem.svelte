@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Popover, Portal } from '@skeletonlabs/skeleton-svelte';
+  import { Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
@@ -43,22 +43,26 @@
         {nameOrPubkey}
       </p>
 
-      <Popover
+      <Menu
         positioning={{ placement: 'bottom' }}
         open={isMenuOpen}
         onOpenChange={(d) => (isMenuOpen = d.open)}
+        navigate={(d) => {
+          window.open(d.href, '_blank', 'noreferrer');
+          isMenuOpen = false;
+        }}
       >
-        <Popover.Trigger class="btn-icon flex-none">
+        <Menu.Trigger class="btn-icon flex-none">
           <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
-        </Popover.Trigger>
+        </Menu.Trigger>
         <Portal>
-          <Popover.Positioner>
-            <Popover.Content class="z-20">
-              <NoteListItemMenu {note} onAction={() => (isMenuOpen = false)} />
-            </Popover.Content>
-          </Popover.Positioner>
+          <Menu.Positioner>
+            <Menu.Content class="card preset-tonal-surface p-2 w-64 z-20 shadow space-y-1">
+              <NoteListItemMenu {note} />
+            </Menu.Content>
+          </Menu.Positioner>
         </Portal>
-      </Popover>
+      </Menu>
     </div>
 
     <p
