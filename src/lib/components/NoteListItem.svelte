@@ -20,8 +20,8 @@
 
   let profileContent = $derived(profile ? JSON.parse(profile.content) : undefined);
   let displayName =
-    $derived(profileContent && profileContent.display_name ? profileContent.display_name : undefined);
-  let profileName = $derived(profileContent && profileContent.name ? profileContent.name : undefined);
+    $derived(profileContent?.display_name ? profileContent.display_name : undefined);
+  let profileName = $derived(profileContent?.name ? profileContent.name : undefined);
   let nameOrPubkey = $derived(displayName ?? profileName ?? shorten(note.pubkey));
 
   let noteContent = $derived(note.content
