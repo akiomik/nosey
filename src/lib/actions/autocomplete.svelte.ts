@@ -49,7 +49,10 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
   }
 
   const prefix = opts.prefix ?? '';
-  const rxNostr = createRxNostr({ verifier });
+  // Skips the NIP-11 info document fetch rx-nostr otherwise makes per relay:
+  // it's only used to cap concurrent subscriptions per relay, and this action
+  // never has more than one active search subscription at a time.
+  const rxNostr = createRxNostr({ verifier, skipFetchNip11: true });
   rxNostr.setDefaultRelays(opts.relays);
 
   let triggerStart: number | null = null;
