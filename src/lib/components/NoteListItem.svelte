@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
@@ -14,8 +11,6 @@
   }
 
   let { note, profile }: Props = $props();
-
-  let isMenuOpen = $state(false);
 
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
 
@@ -43,26 +38,7 @@
         {nameOrPubkey}
       </p>
 
-      <Menu
-        positioning={{ placement: 'bottom' }}
-        open={isMenuOpen}
-        onOpenChange={(d) => (isMenuOpen = d.open)}
-        navigate={(d) => {
-          window.open(d.href, '_blank', 'noreferrer');
-          isMenuOpen = false;
-        }}
-      >
-        <Menu.Trigger class="btn-icon flex-none">
-          <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
-        </Menu.Trigger>
-        <Portal>
-          <Menu.Positioner>
-            <Menu.Content class="card preset-tonal-surface p-2 w-64 z-20 shadow space-y-1">
-              <NoteListItemMenu {note} />
-            </Menu.Content>
-          </Menu.Positioner>
-        </Portal>
-      </Menu>
+      <NoteListItemMenu {note} />
     </div>
 
     <p
