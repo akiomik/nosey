@@ -49,6 +49,7 @@
     "linkify-plugin-mention": "^4.3.3",
     "linkifyjs": "^4.3.3",
     "nostr-tools": "^2.23.9",
+    "rxjs": "^7.8.2",
     "rx-nostr": "^3.7.5"
   }
 }

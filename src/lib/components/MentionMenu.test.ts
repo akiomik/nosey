@@ -48,6 +48,24 @@ describe('MentionMenu', () => {
     expect(getContent()?.querySelector('button')).toBeNull();
   });
 
+  it('distinguishes a timed-out search from no matches', () => {
+    render(MentionMenu, {
+      props: { ...baseProps, loading: false, items: [], error: 'timeout', activeIndex: 0 },
+    });
+
+    expect(getContent()?.textContent).toContain('Search timed out. Please try again.');
+    expect(getContent()?.textContent).not.toContain('No matches found');
+  });
+
+  it('shows an unavailable-service message for non-timeout errors', () => {
+    render(MentionMenu, {
+      props: { ...baseProps, loading: false, items: [], error: 'unavailable', activeIndex: 0 },
+    });
+
+    expect(getContent()?.textContent).toContain('Could not load suggestions. Please try again.');
+    expect(getContent()?.textContent).not.toContain('No matches found');
+  });
+
   it('renders a malicious item name as inert text, never as markup', () => {
     const items = [makeItem({ name: '<img src=x onerror=alert(1)>' })];
     render(MentionMenu, { props: { ...baseProps, loading: false, items, activeIndex: 0 } });
