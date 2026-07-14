@@ -178,6 +178,53 @@ describe('autocomplete', () => {
     action?.destroy();
   }, 15000);
 
+  it('shows only the newest event when relays return different versions of the same profile', async () => {
+    const [relayA, relayB] = RELAY_URLS.map((url) => new WS(url)) as [WS, WS];
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { relays: RELAY_URLS, prefix: 'from:' });
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    const sk = generateSecretKey();
+    const now = Math.floor(Date.now() / 1000);
+    const oldEvent = finalizeEvent(
+      { kind: 0, created_at: now - 100, tags: [], content: JSON.stringify({ name: 'bob-old' }) },
+      sk
+    );
+    const newEvent = finalizeEvent(
+      { kind: 0, created_at: now, tags: [], content: JSON.stringify({ name: 'bob-new' }) },
+      sk
+    );
+
+    // One relay only has the stale copy of the profile, the other has the
+    // freshly updated one -- both are valid results for the same pubkey.
+    for (const [relay, event] of [
+      [relayA, oldEvent],
+      [relayB, newEvent],
+    ] as const) {
+      await relay.connected;
+      const raw = await relay.nextMessage;
+      const [, subId] = JSON.parse(raw as string);
+      relay.send(JSON.stringify(['EVENT', subId, event]));
+      relay.send(JSON.stringify(['EOSE', subId]));
+    }
+
+    await vi.waitFor(() => {
+      expect(getMenuContent()).not.toHaveAttribute('hidden');
+      expect(getMenuContent()?.querySelector('button')).not.toBeNull();
+    });
+
+    const buttons = getMenuContent()?.querySelectorAll('button');
+    expect(buttons).toHaveLength(1);
+    expect(buttons?.[0]?.textContent).toContain('bob-new');
+
+    action?.destroy();
+  }, 15000);
+
   it('debounces input so only the final query reaches the relay', async () => {
     const [relayUrl] = RELAY_URLS;
     const relay = new WS(relayUrl);
