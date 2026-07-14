@@ -44,10 +44,7 @@
           type="text"
           bind:value={formData.from}
           placeholder="npub1..."
-          use:autocomplete={{
-            relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
-            prefix: '',
-          }}
+          use:autocomplete={{ prefix: '' }}
         />
       </div>
     </label>
