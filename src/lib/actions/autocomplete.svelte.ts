@@ -1,10 +1,24 @@
 import { nip19 } from 'nostr-tools';
 import type * as Nostr from 'nostr-typedef';
+import {
+  catchError,
+  debounceTime,
+  EMPTY,
+  map,
+  merge,
+  Observable,
+  retry,
+  Subject,
+  switchMap,
+  throwError,
+  timer,
+} from 'rxjs';
 import { mount, unmount } from 'svelte';
 import { browser } from '$app/environment';
 import MentionMenu from '$lib/components/MentionMenu.svelte';
+import { HttpTooManyRequestsError } from '$lib/errors';
 import { search as searchProfiles } from '$lib/helpers/search';
-import type { MentionItem } from '$lib/types';
+import type { MentionItem, SearchResult } from '$lib/types';
 
 // This intentionally hand-rolls keyboard navigation instead of using
 // @skeletonlabs/skeleton-svelte's `Menu` or `Combobox` (both wrap @zag-js
@@ -24,6 +38,18 @@ export type Opts = {
 const TRIGGER_SUFFIX = '@';
 const MENU_ITEM_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 250;
+const RATE_LIMIT_MAX_RETRIES = 3;
+const RATE_LIMIT_BASE_DELAY_MS = 300;
+
+// Backs off only on 429s; any other error is rethrown immediately so `retry`
+// stops and lets `catchError` surface it as a failed search right away.
+const retryOnRateLimit = (error: unknown, retryCount: number): Observable<number> => {
+  if (error instanceof HttpTooManyRequestsError && retryCount <= RATE_LIMIT_MAX_RETRIES) {
+    return timer(RATE_LIMIT_BASE_DELAY_MS * 2 ** (retryCount - 1));
+  }
+
+  return throwError(() => error);
+};
 
 const findTrigger = (textBeforeCaret: string, prefix: string) => {
   const trigger = `${prefix}${TRIGGER_SUFFIX}`;
@@ -48,10 +74,7 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
   const prefix = opts.prefix ?? '';
 
   let triggerStart: number | null = null;
-  let searchToken = 0;
   let measureCanvas: HTMLCanvasElement | null = null;
-  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let activeController: AbortController | null = null;
 
   const menuProps = $state<{
     open: boolean;
@@ -111,25 +134,13 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     return { x, y, width: 0, height: 0 };
   };
 
-  const cancelPendingSearch = () => {
-    if (debounceTimer !== null) {
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
-    if (activeController) {
-      activeController.abort();
-      activeController = null;
-    }
-  };
-
   const closeMenu = () => {
-    cancelPendingSearch();
+    cancel$.next();
     menuProps.open = false;
     menuProps.items = [];
     menuProps.activeIndex = 0;
     menuProps.loading = false;
     triggerStart = null;
-    searchToken += 1;
   };
 
   const parseMentionItem = (pubkey: string, content: string): MentionItem => {
@@ -143,55 +154,72 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     }
   };
 
-  const search = (query: string) => {
-    cancelPendingSearch();
-    const token = ++searchToken;
+  const fetchProfiles = (query: string): Observable<SearchResult> =>
+    new Observable<SearchResult>((subscriber) => {
+      const controller = new AbortController();
 
+      searchProfiles({ query, kind: 0, limit: MENU_ITEM_LIMIT }, controller.signal)
+        .then((result) => {
+          subscriber.next(result);
+          subscriber.complete();
+        })
+        .catch((error) => subscriber.error(error));
+
+      // Ties fetch cancellation to unsubscription, so `switchMap` aborts the
+      // previous request in flight as soon as a newer query supersedes it.
+      return () => controller.abort();
+    });
+
+  // `query$` drives both the synchronous "Searching..." feedback (below,
+  // undebounced) and the debounced network fetch below it. `cancel$` bypasses
+  // the debounce to abort an in-flight or pending fetch immediately when the
+  // menu closes, instead of waiting out `SEARCH_DEBOUNCE_MS`.
+  const query$ = new Subject<string>();
+  const cancel$ = new Subject<void>();
+
+  const uiSub = query$.subscribe((query) => {
     if (query === '') {
       menuProps.items = [];
       menuProps.loading = false;
-      return;
+    } else {
+      menuProps.loading = true;
     }
+  });
 
-    menuProps.loading = true;
+  const searchSub = merge(
+    query$.pipe(debounceTime(SEARCH_DEBOUNCE_MS)),
+    cancel$.pipe(map(() => ''))
+  )
+    .pipe(
+      // Switching to a new inner observable unsubscribes the previous one,
+      // which aborts its fetch and discards its (now stale) response --
+      // replacing the hand-rolled AbortController/search-token bookkeeping.
+      switchMap((query) => {
+        if (query === '') {
+          return EMPTY;
+        }
 
-    debounceTimer = setTimeout(async () => {
-      debounceTimer = null;
-      const controller = new AbortController();
-      activeController = controller;
-
-      try {
-        const result = await searchProfiles(
-          { query, kind: 0, limit: MENU_ITEM_LIMIT },
-          controller.signal
+        return fetchProfiles(query).pipe(
+          retry({ delay: retryOnRateLimit }),
+          catchError(() => {
+            // Network/HTTP failure (or retries exhausted) shouldn't leave the
+            // menu stuck on "Searching...".
+            menuProps.items = [];
+            menuProps.loading = false;
+            return EMPTY;
+          })
         );
-        activeController = null;
+      })
+    )
+    .subscribe((result) => {
+      menuProps.items = result.data
+        .map(({ pubkey, content }: Nostr.Event) => parseMentionItem(pubkey, content))
+        .slice(0, MENU_ITEM_LIMIT);
+      menuProps.loading = false;
+    });
 
-        if (token !== searchToken) {
-          return;
-        }
-
-        menuProps.items = result.data
-          .map(({ pubkey, content }: Nostr.Event) => parseMentionItem(pubkey, content))
-          .slice(0, MENU_ITEM_LIMIT);
-        menuProps.loading = false;
-      } catch (e) {
-        activeController = null;
-
-        if (token !== searchToken) {
-          return;
-        }
-
-        if (e instanceof DOMException && e.name === 'AbortError') {
-          // Superseded by a newer search; that search owns the UI state now.
-          return;
-        }
-
-        // Network/HTTP failure shouldn't leave the menu stuck on "Searching...".
-        menuProps.items = [];
-        menuProps.loading = false;
-      }
-    }, SEARCH_DEBOUNCE_MS);
+  const search = (query: string) => {
+    query$.next(query);
   };
 
   const selectItem = (item: MentionItem) => {
@@ -284,7 +312,8 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
       node.removeEventListener('input', handleInput);
       node.removeEventListener('keydown', handleKeydown);
       node.removeEventListener('blur', handleBlur);
-      cancelPendingSearch();
+      uiSub.unsubscribe();
+      searchSub.unsubscribe();
       unmount(menu);
     },
   };

@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
 import type { SearchResult } from '$lib/types';
 import { search } from './search';
 
@@ -37,6 +37,16 @@ describe('search', () => {
     );
 
     await expect(search({ query: 'hello' })).rejects.toThrow(HttpBadRequestError);
+  });
+
+  it('throws HttpTooManyRequestsError on a 429 response', async () => {
+    server.use(
+      http.get('https://api.nostr.wine/search', () =>
+        HttpResponse.json({ error: 'rate limited' }, { status: 429 })
+      )
+    );
+
+    await expect(search({ query: 'hello' })).rejects.toThrow(HttpTooManyRequestsError);
   });
 
   it('throws HttpBadGatewayError on a 5xx response', async () => {

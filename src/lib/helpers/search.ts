@@ -1,4 +1,4 @@
-import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
 import type { Encoded, SearchQuery, SearchResult } from '$lib/types';
 
 function encode(query: Partial<SearchQuery>): Encoded<Partial<SearchQuery>> {
@@ -37,7 +37,9 @@ export async function search(
   const data = await res.json();
 
   if (!res.ok) {
-    if (res.status < 500) {
+    if (res.status === 429) {
+      throw new HttpTooManyRequestsError(JSON.stringify(data.error));
+    } else if (res.status < 500) {
       throw new HttpBadRequestError(JSON.stringify(data.error));
     } else {
       throw new HttpBadGatewayError(JSON.stringify(data.error));

@@ -206,6 +206,70 @@ describe('autocomplete', () => {
     action?.destroy();
   });
 
+  it('retries on 429 with backoff and eventually shows results', async () => {
+    const { event } = makeProfileEvent(JSON.stringify({ name: 'bob' }));
+    let attempts = 0;
+    server.use(
+      http.get(SEARCH_URL, () => {
+        attempts += 1;
+        if (attempts <= 2) {
+          return HttpResponse.json({ error: 'rate limited' }, { status: 429 });
+        }
+        return HttpResponse.json({
+          data: [event],
+          pagination: {
+            last_page: true,
+            limit: 20,
+            next_url: '',
+            page: 0,
+            total_pages: 1,
+            total_records: 1,
+          },
+        });
+      })
+    );
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { prefix: 'from:' });
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    await vi.waitFor(
+      () => {
+        expect(getMenuContent()?.textContent).toContain('bob');
+      },
+      { timeout: 5000 }
+    );
+
+    expect(attempts).toBe(3);
+
+    action?.destroy();
+  });
+
+  it('gives up after exhausting 429 retries instead of retrying forever', async () => {
+    mockSearchError(429);
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const action = autocomplete(input, { prefix: 'from:' });
+
+    input.value = 'from:@bob';
+    input.setSelectionRange(input.value.length, input.value.length);
+    await fireEvent.input(input);
+
+    await vi.waitFor(
+      () => {
+        expect(getMenuContent()?.textContent).toContain('No matches found');
+      },
+      { timeout: 5000 }
+    );
+
+    action?.destroy();
+  });
+
   it('debounces input so only the final query reaches the API', async () => {
     const requestedQueries: string[] = [];
     server.use(

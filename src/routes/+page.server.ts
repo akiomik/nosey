@@ -1,6 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
-import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
 import { parseQuery } from '$lib/helpers/parseQuery';
 import { search } from '$lib/helpers/search';
 
@@ -28,6 +28,10 @@ export async function load({ url }: RequestEvent) {
     return { q, page, result };
   } catch (e) {
     // TODO: Improve error message
+
+    if (e instanceof HttpTooManyRequestsError) {
+      throw error(429, JSON.parse(e.message));
+    }
 
     if (e instanceof HttpBadRequestError) {
       throw error(400, JSON.parse(e.message));
