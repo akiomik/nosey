@@ -96,10 +96,7 @@
         value={q}
         aria-label="search"
         oninput={handleQuery}
-        use:autocomplete={{
-          relays: ['wss://search.nos.today', 'wss://relay.nostr.band'],
-          prefix: 'from:',
-        }}
+        use:autocomplete={{ prefix: 'from:' }}
         autofocus
       />
       <button type="submit" class="ig-btn preset-filled-primary-500">

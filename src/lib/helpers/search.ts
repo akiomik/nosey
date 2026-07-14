@@ -24,13 +24,16 @@ function encode(query: Partial<SearchQuery>): Encoded<Partial<SearchQuery>> {
   return Object.fromEntries(entries);
 }
 
-export async function search(query: Partial<SearchQuery>): Promise<SearchResult> {
+export async function search(
+  query: Partial<SearchQuery>,
+  signal?: AbortSignal
+): Promise<SearchResult> {
   // TODO: Don't search when query is empty
   const params = new URLSearchParams(encode(query));
   const url = `https://api.nostr.wine/search?${params}`;
   console.debug(url, query);
 
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   const data = await res.json();
 
   if (!res.ok) {

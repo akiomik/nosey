@@ -1,11 +1,9 @@
-import { verifier } from '@rx-nostr/crypto';
-import { type NostrEvent, nip19 } from 'nostr-tools';
-import { createRxNostr, createRxOneshotReq, filterBy, verify } from 'rx-nostr';
-import type { Subscription } from 'rxjs';
-import { map, reduce } from 'rxjs';
+import { nip19 } from 'nostr-tools';
+import type * as Nostr from 'nostr-typedef';
 import { mount, unmount } from 'svelte';
 import { browser } from '$app/environment';
 import MentionMenu from '$lib/components/MentionMenu.svelte';
+import { search as searchProfiles } from '$lib/helpers/search';
 import type { MentionItem } from '$lib/types';
 
 // This intentionally hand-rolls keyboard navigation instead of using
@@ -20,7 +18,6 @@ import type { MentionItem } from '$lib/types';
 //   composed and only the `prefix@query` substring after the trigger should
 //   ever be replaced -- the rest of the buffer must survive untouched.
 export type Opts = {
-  relays: string[];
   prefix: string;
 };
 
@@ -44,22 +41,17 @@ const findTrigger = (textBeforeCaret: string, prefix: string) => {
 };
 
 export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
-  if (!browser || !opts.relays) {
+  if (!browser) {
     return;
   }
 
   const prefix = opts.prefix ?? '';
-  // Skips the NIP-11 info document fetch rx-nostr otherwise makes per relay:
-  // it's only used to cap concurrent subscriptions per relay, and this action
-  // never has more than one active search subscription at a time.
-  const rxNostr = createRxNostr({ verifier, skipFetchNip11: true });
-  rxNostr.setDefaultRelays(opts.relays);
 
   let triggerStart: number | null = null;
   let searchToken = 0;
   let measureCanvas: HTMLCanvasElement | null = null;
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let activeSubscription: Subscription | null = null;
+  let activeController: AbortController | null = null;
 
   const menuProps = $state<{
     open: boolean;
@@ -124,9 +116,9 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
       clearTimeout(debounceTimer);
       debounceTimer = null;
     }
-    if (activeSubscription) {
-      activeSubscription.unsubscribe();
-      activeSubscription = null;
+    if (activeController) {
+      activeController.abort();
+      activeController = null;
     }
   };
 
@@ -140,32 +132,13 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     searchToken += 1;
   };
 
-  // Picks the newest event per pubkey, using the same tie-break as NIP-01
-  // replaceable events (highest created_at, then highest id). rx-nostr's
-  // `latestEach` doesn't fit here: it emits the running "latest so far"
-  // value on every update rather than only the final one, so relays holding
-  // different-versioned kind:0 events for the same author would leave
-  // duplicate pubkeys in the result (and crash MentionMenu's keyed
-  // `{#each}`).
-  const keepNewestPerPubkey = (latestByPubkey: Map<string, NostrEvent>, event: NostrEvent) => {
-    const current = latestByPubkey.get(event.pubkey);
-    if (
-      !current ||
-      current.created_at < event.created_at ||
-      (current.created_at === event.created_at && current.id < event.id)
-    ) {
-      latestByPubkey.set(event.pubkey, event);
-    }
-    return latestByPubkey;
-  };
-
   const parseMentionItem = (pubkey: string, content: string): MentionItem => {
     try {
       const { name, display_name: displayName, picture, nip05 } = JSON.parse(content);
       return { pubkey, content, name: name ?? displayName ?? pubkey, picture, nip05 };
     } catch {
       // Malformed profile content (e.g. a kind:0 event with invalid JSON) shouldn't
-      // crash the search subscription and leave the menu stuck on "Searching...".
+      // crash the search and leave the menu stuck on "Searching...".
       return { pubkey, content, name: pubkey, picture: '', nip05: '' };
     }
   };
@@ -182,31 +155,42 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
 
     menuProps.loading = true;
 
-    debounceTimer = setTimeout(() => {
+    debounceTimer = setTimeout(async () => {
       debounceTimer = null;
+      const controller = new AbortController();
+      activeController = controller;
 
-      const req = createRxOneshotReq({ filters: [{ kinds: [0], search: query, limit: 10 }] });
+      try {
+        const result = await searchProfiles(
+          { query, kind: 0, limit: MENU_ITEM_LIMIT },
+          controller.signal
+        );
+        activeController = null;
 
-      activeSubscription = rxNostr
-        .use(req)
-        .pipe(
-          filterBy({ kinds: [0], search: query }),
-          verify(verifier),
-          map(({ event }) => event),
-          reduce(keepNewestPerPubkey, new Map<string, NostrEvent>())
-        )
-        .subscribe((latestByPubkey) => {
-          activeSubscription = null;
+        if (token !== searchToken) {
+          return;
+        }
 
-          if (token !== searchToken) {
-            return;
-          }
+        menuProps.items = result.data
+          .map(({ pubkey, content }: Nostr.Event) => parseMentionItem(pubkey, content))
+          .slice(0, MENU_ITEM_LIMIT);
+        menuProps.loading = false;
+      } catch (e) {
+        activeController = null;
 
-          menuProps.items = [...latestByPubkey.values()]
-            .map(({ pubkey, content }) => parseMentionItem(pubkey, content))
-            .slice(0, MENU_ITEM_LIMIT);
-          menuProps.loading = false;
-        });
+        if (token !== searchToken) {
+          return;
+        }
+
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          // Superseded by a newer search; that search owns the UI state now.
+          return;
+        }
+
+        // Network/HTTP failure shouldn't leave the menu stuck on "Searching...".
+        menuProps.items = [];
+        menuProps.loading = false;
+      }
     }, SEARCH_DEBOUNCE_MS);
   };
 
@@ -302,7 +286,6 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
       node.removeEventListener('blur', handleBlur);
       cancelPendingSearch();
       unmount(menu);
-      rxNostr.dispose();
     },
   };
 };

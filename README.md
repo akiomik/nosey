@@ -8,7 +8,7 @@ Focus on supporting features similar to Twitter search directives.
 ## Features
 
 - `from:npub...` directive
-- `from:@...` for npub completion (using NIP-50)
+- `from:@...` for npub completion
 - `since:YYYY-MM-DD` and `until:YYYY-MM-DD` directives (limited support)
 
 ## Developing
