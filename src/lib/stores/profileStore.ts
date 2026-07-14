@@ -26,13 +26,15 @@ export const profileStore = (pubkeys: string[]): Readable<Record<string, Nostr.E
     );
 
     sub.subscribe((event) => {
-      update(($profileMap: Record<string, Nostr.Event>) => {
-        if ($profileMap[event.pubkey]) {
-          return { ...$profileMap };
-        }
-
-        return { ...$profileMap, ...Object.fromEntries([[event.pubkey, event]]) };
-      });
+      // `latestEach` only re-emits a pubkey once a strictly newer event for it
+      // has arrived (ties and older events are filtered upstream), so every
+      // emission here is safe to write straight through -- skipping it when
+      // the pubkey is already present would freeze the store on whichever
+      // relay answered first, even if a slower relay held a newer profile.
+      update(($profileMap: Record<string, Nostr.Event>) => ({
+        ...$profileMap,
+        [event.pubkey]: event,
+      }));
     });
 
     return () => rxNostr.dispose();
