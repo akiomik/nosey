@@ -2,7 +2,7 @@ import { verifier } from '@rx-nostr/crypto';
 import { type NostrEvent, nip19 } from 'nostr-tools';
 import { createRxNostr, createRxOneshotReq, filterBy, verify } from 'rx-nostr';
 import type { Subscription } from 'rxjs';
-import { map, toArray } from 'rxjs';
+import { map, reduce } from 'rxjs';
 import { mount, unmount } from 'svelte';
 import { browser } from '$app/environment';
 import MentionMenu from '$lib/components/MentionMenu.svelte';
@@ -140,27 +140,23 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
     searchToken += 1;
   };
 
-  // rx-nostr's `latestEach` emits the running "latest so far" value on every
-  // update rather than only the final one, so piping it into `toArray()`
-  // would collect every intermediate version too. When relays hold
-  // different-versioned kind:0 events for the same author, that leaves
-  // duplicate pubkeys in the array (and crashes MentionMenu's keyed
-  // `{#each}`). Pick the newest event per pubkey ourselves instead, using the
-  // same tie-break as NIP-01 replaceable events (highest created_at, then
-  // highest id).
-  const pickLatestByPubkey = (events: NostrEvent[]): NostrEvent[] => {
-    const latestByPubkey = new Map<string, NostrEvent>();
-    for (const event of events) {
-      const current = latestByPubkey.get(event.pubkey);
-      if (
-        !current ||
-        current.created_at < event.created_at ||
-        (current.created_at === event.created_at && current.id < event.id)
-      ) {
-        latestByPubkey.set(event.pubkey, event);
-      }
+  // Picks the newest event per pubkey, using the same tie-break as NIP-01
+  // replaceable events (highest created_at, then highest id). rx-nostr's
+  // `latestEach` doesn't fit here: it emits the running "latest so far"
+  // value on every update rather than only the final one, so relays holding
+  // different-versioned kind:0 events for the same author would leave
+  // duplicate pubkeys in the result (and crash MentionMenu's keyed
+  // `{#each}`).
+  const keepNewestPerPubkey = (latestByPubkey: Map<string, NostrEvent>, event: NostrEvent) => {
+    const current = latestByPubkey.get(event.pubkey);
+    if (
+      !current ||
+      current.created_at < event.created_at ||
+      (current.created_at === event.created_at && current.id < event.id)
+    ) {
+      latestByPubkey.set(event.pubkey, event);
     }
-    return [...latestByPubkey.values()];
+    return latestByPubkey;
   };
 
   const parseMentionItem = (pubkey: string, content: string): MentionItem => {
@@ -197,16 +193,16 @@ export const autocomplete = (node: HTMLInputElement, opts: Partial<Opts>) => {
           filterBy({ kinds: [0], search: query }),
           verify(verifier),
           map(({ event }) => event),
-          toArray()
+          reduce(keepNewestPerPubkey, new Map<string, NostrEvent>())
         )
-        .subscribe((events) => {
+        .subscribe((latestByPubkey) => {
           activeSubscription = null;
 
           if (token !== searchToken) {
             return;
           }
 
-          menuProps.items = pickLatestByPubkey(events)
+          menuProps.items = [...latestByPubkey.values()]
             .map(({ pubkey, content }) => parseMentionItem(pubkey, content))
             .slice(0, MENU_ITEM_LIMIT);
           menuProps.loading = false;
