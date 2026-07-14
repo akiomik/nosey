@@ -12,6 +12,7 @@
     anchorElement: HTMLElement;
     loading: boolean;
     items: MentionItem[];
+    error?: 'timeout' | 'unavailable' | null;
     activeIndex: number;
     onSelect: (item: MentionItem) => void;
   }
@@ -23,6 +24,7 @@
     anchorElement,
     loading,
     items,
+    error = null,
     activeIndex,
     onSelect,
   }: Props = $props();
@@ -64,6 +66,10 @@
     <div {...popover().getContentProps()} class="card preset-tonal-surface p-4 z-[300] mt-2 shadow">
       {#if loading}
         <p class="px-3 py-1.5 opacity-60">Searching...</p>
+      {:else if error === 'timeout'}
+        <p class="px-3 py-1.5 opacity-60">Search timed out. Please try again.</p>
+      {:else if error === 'unavailable'}
+        <p class="px-3 py-1.5 opacity-60">Could not load suggestions. Please try again.</p>
       {:else if items.length === 0}
         <p class="px-3 py-1.5 opacity-60">No matches found</p>
       {:else}

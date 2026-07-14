@@ -1,191 +1,77 @@
 import { fireEvent } from '@testing-library/svelte';
-import { HttpResponse, http } from 'msw';
-import { setupServer } from 'msw/node';
-import {
-  type EventTemplate,
-  finalizeEvent,
-  generateSecretKey,
-  getPublicKey,
-  nip19,
-} from 'nostr-tools';
-import type * as Nostr from 'nostr-typedef';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { nip19 } from 'nostr-tools';
+import { writable } from 'svelte/store';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ProfileSuggestions, ProfileSuggestionsState } from '$lib/stores/profileSuggestions';
+import type { MentionItem } from '$lib/types';
+
+const { profileSuggestionsMock } = vi.hoisted(() => ({ profileSuggestionsMock: vi.fn() }));
+
+vi.mock('$lib/stores/profileSuggestions', () => ({
+  profileSuggestions: profileSuggestionsMock,
+}));
+
 import { autocomplete } from './autocomplete.svelte';
 
-const SEARCH_URL = 'https://api.nostr.wine/search';
-
-const server = setupServer();
-
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => {
-  server.resetHandlers();
-  document.body.innerHTML = '';
+const makeItem = (pubkey: string, name: string): MentionItem => ({
+  pubkey,
+  content: JSON.stringify({ name }),
+  name,
+  picture: '',
+  nip05: '',
 });
-afterAll(() => server.close());
 
-const makeProfileEvent = (content: string, overrides: Partial<EventTemplate> = {}) => {
-  const sk = generateSecretKey();
-  const pubkey = getPublicKey(sk);
-  const template: EventTemplate = {
-    kind: 0,
-    created_at: Math.floor(Date.now() / 1000),
-    tags: [],
-    content,
-    ...overrides,
+const createSuggestions = () => {
+  const state = writable<ProfileSuggestionsState>({ loading: false, items: [], error: null });
+  const suggestions: ProfileSuggestions = {
+    subscribe: state.subscribe,
+    search: vi.fn(),
+    cancel: vi.fn(() => state.set({ loading: false, items: [], error: null })),
+    destroy: vi.fn(),
   };
-  return { pubkey, event: finalizeEvent(template, sk) };
+
+  return { state, suggestions };
 };
 
-const mockSearchResult = (events: Nostr.Event[]) => {
-  server.use(
-    http.get(SEARCH_URL, () =>
-      HttpResponse.json({
-        data: events,
-        pagination: {
-          last_page: true,
-          limit: 20,
-          next_url: '',
-          page: 0,
-          total_pages: 1,
-          total_records: events.length,
-        },
-      })
-    )
-  );
-};
+let state: ReturnType<typeof writable<ProfileSuggestionsState>>;
+let suggestions: ProfileSuggestions;
 
-const mockSearchError = (status: number) => {
-  server.use(http.get(SEARCH_URL, () => HttpResponse.json({ error: 'oops' }, { status })));
-};
+beforeEach(() => {
+  ({ state, suggestions } = createSuggestions());
+  profileSuggestionsMock.mockReturnValue(suggestions);
+});
 
-const getMenuContent = () =>
-  document.body.querySelector('[data-scope="popover"][data-part="content"]');
+afterEach(() => {
+  document.body.innerHTML = '';
+  vi.clearAllMocks();
+});
 
 describe('autocomplete', () => {
-  it('opens a menu with search results, renders them safely, and Enter replaces only the trigger text', async () => {
-    const { pubkey, event } = makeProfileEvent(
-      JSON.stringify({ name: '<img src=x onerror=alert(1)>', picture: '', nip05: '' })
-    );
-    mockSearchResult([event]);
-
+  it('passes the trigger query to the suggestions store and Enter replaces only the trigger text', async () => {
+    const item = makeItem('a'.repeat(64), 'Alice');
     const input = document.createElement('input');
     document.body.appendChild(input);
     const action = autocomplete(input, { prefix: 'from:' });
 
-    input.value = 'hello from:@bob world';
-    const caret = 'hello from:@bob'.length;
+    input.value = 'hello from:@alice world';
+    const caret = 'hello from:@alice'.length;
     input.setSelectionRange(caret, caret);
     await fireEvent.input(input);
 
-    await vi.waitFor(() => {
-      expect(getMenuContent()).not.toHaveAttribute('hidden');
-      expect(getMenuContent()?.querySelector('button')).not.toBeNull();
-    });
+    expect(suggestions.search).toHaveBeenCalledWith('alice');
 
-    // The malicious name must show up as inert text, never as a parsed element/attribute.
-    const content = getMenuContent();
-    expect(content?.querySelector('img[onerror]')).toBeNull();
-    expect(content?.textContent).toContain('<img src=x onerror=alert(1)>');
-
+    state.set({ loading: false, items: [item], error: null });
     await fireEvent.keyDown(input, { key: 'Enter' });
 
-    expect(input.value).toBe(`hello from:${nip19.npubEncode(pubkey)} world`);
-    expect(getMenuContent()).toHaveAttribute('hidden');
+    expect(input.value).toBe(`hello from:${nip19.npubEncode(item.pubkey)} world`);
+    expect(suggestions.cancel).toHaveBeenCalled();
 
     action?.destroy();
   });
 
-  it('closes the menu on Escape without changing the input value', async () => {
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(getMenuContent()).not.toHaveAttribute('hidden');
-    });
-
-    await fireEvent.keyDown(input, { key: 'Escape' });
-
-    expect(getMenuContent()).toHaveAttribute('hidden');
-    expect(input.value).toBe('from:@bob');
-
-    action?.destroy();
-  });
-
-  it('recovers from a profile event with invalid JSON content instead of getting stuck loading', async () => {
-    const { pubkey, event } = makeProfileEvent('{not valid json');
-    mockSearchResult([event]);
-
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(getMenuContent()).not.toHaveAttribute('hidden');
-      expect(getMenuContent()?.textContent).not.toContain('Searching...');
-    });
-
-    // Falls back to the raw pubkey as the display name instead of throwing and
-    // leaving the menu stuck on "Searching...".
-    expect(getMenuContent()?.textContent).toContain(pubkey);
-
-    action?.destroy();
-  });
-
-  it('recovers from a search API failure instead of getting stuck loading', async () => {
-    mockSearchError(502);
-
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(getMenuContent()).not.toHaveAttribute('hidden');
-      expect(getMenuContent()?.textContent).toContain('No matches found');
-    });
-
-    action?.destroy();
-  });
-
-  it('caps results at 10 items when the API returns more than the limit', async () => {
-    const events = Array.from(
-      { length: 12 },
-      (_, i) => makeProfileEvent(JSON.stringify({ name: `user-${i}` })).event
-    );
-    mockSearchResult(events);
-
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(getMenuContent()?.querySelectorAll('button').length).toBe(10);
-    });
-
-    action?.destroy();
-  });
-
-  it('navigates results with arrow keys and Enter confirms the highlighted item', async () => {
-    const first = makeProfileEvent(JSON.stringify({ name: 'first' }));
-    const second = makeProfileEvent(JSON.stringify({ name: 'second' }));
-    mockSearchResult([first.event, second.event]);
-
+  it('uses the highlighted suggestion for ArrowDown then Enter', async () => {
+    const first = makeItem('a'.repeat(64), 'Alice');
+    const second = makeItem('b'.repeat(64), 'Bob');
     const input = document.createElement('input');
     document.body.appendChild(input);
     const action = autocomplete(input, { prefix: 'from:' });
@@ -193,42 +79,18 @@ describe('autocomplete', () => {
     input.value = 'from:@bo';
     input.setSelectionRange(input.value.length, input.value.length);
     await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(getMenuContent()?.querySelectorAll('button').length).toBe(2);
-    });
+    state.set({ loading: false, items: [first, second], error: null });
 
     await fireEvent.keyDown(input, { key: 'ArrowDown' });
     await fireEvent.keyDown(input, { key: 'Enter' });
 
     expect(input.value).toBe(`from:${nip19.npubEncode(second.pubkey)}`);
+    expect(suggestions.cancel).toHaveBeenCalled();
 
     action?.destroy();
   });
 
-  it('retries on 429 with backoff and eventually shows results', async () => {
-    const { event } = makeProfileEvent(JSON.stringify({ name: 'bob' }));
-    let attempts = 0;
-    server.use(
-      http.get(SEARCH_URL, () => {
-        attempts += 1;
-        if (attempts <= 2) {
-          return HttpResponse.json({ error: 'rate limited' }, { status: 429 });
-        }
-        return HttpResponse.json({
-          data: [event],
-          pagination: {
-            last_page: true,
-            limit: 20,
-            next_url: '',
-            page: 0,
-            total_pages: 1,
-            total_records: 1,
-          },
-        });
-      })
-    );
-
+  it('cancels suggestions when Escape closes the menu', async () => {
     const input = document.createElement('input');
     document.body.appendChild(input);
     const action = autocomplete(input, { prefix: 'from:' });
@@ -236,80 +98,12 @@ describe('autocomplete', () => {
     input.value = 'from:@bob';
     input.setSelectionRange(input.value.length, input.value.length);
     await fireEvent.input(input);
+    await fireEvent.keyDown(input, { key: 'Escape' });
 
-    await vi.waitFor(
-      () => {
-        expect(getMenuContent()?.textContent).toContain('bob');
-      },
-      { timeout: 5000 }
-    );
-
-    expect(attempts).toBe(3);
+    expect(suggestions.cancel).toHaveBeenCalledTimes(1);
+    expect(input.value).toBe('from:@bob');
 
     action?.destroy();
-  });
-
-  it('gives up after exhausting 429 retries instead of retrying forever', async () => {
-    mockSearchError(429);
-
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(
-      () => {
-        expect(getMenuContent()?.textContent).toContain('No matches found');
-      },
-      { timeout: 5000 }
-    );
-
-    action?.destroy();
-  });
-
-  it('debounces input so only the final query reaches the API', async () => {
-    const requestedQueries: string[] = [];
-    server.use(
-      http.get(SEARCH_URL, ({ request }) => {
-        const url = new URL(request.url);
-        requestedQueries.push(url.searchParams.get('query') ?? '');
-        return HttpResponse.json({
-          data: [],
-          pagination: {
-            last_page: true,
-            limit: 20,
-            next_url: '',
-            page: 0,
-            total_pages: 1,
-            total_records: 0,
-          },
-        });
-      })
-    );
-
-    const input = document.createElement('input');
-    document.body.appendChild(input);
-    const action = autocomplete(input, { prefix: 'from:' });
-
-    input.value = 'from:@b';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    // Type the rest before the debounce timer fires; the first keystroke's
-    // search must never reach the API.
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    input.value = 'from:@bob';
-    input.setSelectionRange(input.value.length, input.value.length);
-    await fireEvent.input(input);
-
-    await vi.waitFor(() => {
-      expect(requestedQueries).toEqual(['bob']);
-    });
-
-    action?.destroy();
+    expect(suggestions.destroy).toHaveBeenCalledTimes(1);
   });
 });

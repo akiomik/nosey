@@ -1,6 +1,24 @@
 import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
 import type { Encoded, SearchQuery, SearchResult } from '$lib/types';
 
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) {
+    return Math.max(0, Math.ceil(seconds * 1000));
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return undefined;
+  }
+
+  return Math.max(0, timestamp - Date.now());
+}
+
 function encode(query: Partial<SearchQuery>): Encoded<Partial<SearchQuery>> {
   const entries = Object.entries(query)
     .map(([key, value]) => {
@@ -38,7 +56,10 @@ export async function search(
 
   if (!res.ok) {
     if (res.status === 429) {
-      throw new HttpTooManyRequestsError(JSON.stringify(data.error));
+      throw new HttpTooManyRequestsError(
+        JSON.stringify(data.error),
+        parseRetryAfter(res.headers.get('Retry-After'))
+      );
     } else if (res.status < 500) {
       throw new HttpBadRequestError(JSON.stringify(data.error));
     } else {
