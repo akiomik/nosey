@@ -5,6 +5,15 @@
 
 @plugin "@tailwindcss/forms";
 
+/* Windows Bugfix: https://github.com/skeletonlabs/skeleton/issues/3993 */
+.select,
+.input,
+.textarea,
+.input-group {
+  background-color: var(--color-surface-50-950);
+  color: var(--color-surface-950-50);
+}
+
 /* NOTE: no .dark class is ever applied in this app, so this keeps the
    previous (v3 darkMode: 'class') behavior of always rendering the
    light theme regardless of the OS color-scheme preference. */
