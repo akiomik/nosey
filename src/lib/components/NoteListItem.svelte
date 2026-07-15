@@ -114,7 +114,7 @@
       </div>
 
       <p class="flex-auto min-w-0 flex items-center gap-1">
-        <span class="font-bold truncate shrink-0">{nameOrPubkey}</span>
+        <span class="font-bold truncate min-w-0">{nameOrPubkey}</span>
         {#if profileMetadata?.nip05}
           <span class="min-w-0 flex-1 truncate flex items-center gap-1">
             <code class="code truncate overflow-x-hidden!">{zostr.nip05.formatIdentifier(profileMetadata.nip05)}</code>
