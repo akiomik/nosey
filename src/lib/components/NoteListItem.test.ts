@@ -156,5 +156,18 @@ describe('NoteListItem', () => {
       await fireEvent.click(trigger);
       expect(trigger).toHaveTextContent('Show more');
     });
+
+    it('lets unbreakable long tokens (e.g. an unreplaced nostr: identifier) wrap instead of overflowing the card, for both short and long posts', () => {
+      const shortWithRawIdentifier = withContent(`nostr:nevent1${'q'.repeat(70)}`);
+      const { container: shortContainer } = render(NoteListItem, {
+        props: { note: shortWithRawIdentifier, profile: undefined },
+      });
+      expect(shortContainer.querySelector('p.break-words')).not.toBeNull();
+
+      const { container: longContainer } = render(NoteListItem, {
+        props: { note: withContent('a'.repeat(600)), profile: undefined },
+      });
+      expect(longContainer.querySelector('p.break-words')).not.toBeNull();
+    });
   });
 });

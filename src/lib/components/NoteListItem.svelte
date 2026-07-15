@@ -59,7 +59,7 @@
       attributes: { alt: 'Embed image', decoding: 'async', loading: 'lazy' },
     }}
     use:linkify={linkifyOpts}
-    class={className}
+    class="break-words {className}"
   >
     {noteContent}
   </p>
