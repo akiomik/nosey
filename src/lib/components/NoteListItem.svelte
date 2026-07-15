@@ -1,8 +1,10 @@
 <script lang="ts">
   import type * as Nostr from 'nostr-typedef';
+  import { zostr } from 'zod-nostr';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/profile';
+  import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
 
@@ -38,8 +40,14 @@
         <ProfileAvatar picture={profileMetadata?.picture ?? ''} name={nameOrPubkey} />
       </div>
 
-      <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">
-        {nameOrPubkey}
+      <p class="flex-auto min-w-0 flex items-center gap-1">
+        <span class="font-bold truncate shrink-0">{nameOrPubkey}</span>
+        {#if profileMetadata?.nip05}
+          <span class="min-w-0 flex-1 truncate flex items-center gap-1">
+            <code class="code truncate">{zostr.nip05.formatIdentifier(profileMetadata.nip05)}</code>
+            <Nip05Badge pubkey={note.pubkey} nip05={profileMetadata.nip05} />
+          </span>
+        {/if}
       </p>
 
       <NoteListItemMenu {note} />
