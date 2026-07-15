@@ -14,8 +14,10 @@ import {
 } from 'rxjs';
 import { type Readable, writable } from 'svelte/store';
 import { HttpTooManyRequestsError } from '$lib/errors';
-import { rateLimitedSearch } from '$lib/helpers/rateLimitedSearch';
-import type { MentionItem, SearchResult } from '$lib/types';
+import { rateLimitedSearch } from '$lib/search/rate-limited';
+import { createProfileSuggestionRequest } from '$lib/search/request';
+import type { SearchResult } from '$lib/search/result';
+import type { MentionItem } from '$lib/types';
 
 const MENU_ITEM_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 250;
@@ -66,7 +68,7 @@ const parseMentionItem = (pubkey: string, content: string): MentionItem => {
 };
 
 const defaultSearch: ProfileSearch = (query, signal) =>
-  rateLimitedSearch({ query, kind: 0, limit: MENU_ITEM_LIMIT }, signal);
+  rateLimitedSearch(createProfileSuggestionRequest(query, MENU_ITEM_LIMIT), signal);
 
 const fetchProfiles = (query: string, search: ProfileSearch): Observable<SearchResult> =>
   new Observable<SearchResult>((subscriber) => {

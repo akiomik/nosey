@@ -3,17 +3,15 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { Dialog, Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import { goto } from '$app/navigation';
-  import { buildQuery } from '$lib/helpers/buildQuery';
-  import type { AdvancedSearchFormData } from '$lib/types';
+  import type { SearchFilters } from '$lib/search/filters';
+  import { searchTextCodec } from '$lib/search/text';
   import AdvancedSearchModal from './AdvancedSearchModal.svelte';
 
   let isMenuOpen = $state(false);
   let isAdvancedSearchOpen = $state(false);
 
-  const handleSubmit = (form: AdvancedSearchFormData) => {
-    console.debug('advanced search', form);
-
-    const query = buildQuery(form);
+  const handleSubmit = (filters: SearchFilters) => {
+    const query = searchTextCodec.encode(filters);
     goto(`/?${new URLSearchParams({ q: query })}`);
     isAdvancedSearchOpen = false;
   };

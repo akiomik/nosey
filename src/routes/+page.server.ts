@@ -1,29 +1,31 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
-import { parseQuery } from '$lib/helpers/parseQuery';
-import { search } from '$lib/helpers/search';
+import { search } from '$lib/search/api';
+import { hasSearchFilter } from '$lib/search/filters';
+import { createNoteSearchRequest } from '$lib/search/request';
+import { searchTextCodec } from '$lib/search/text';
+import { SearchUrlSchema } from '$lib/search/url';
 
 export async function load({ url }: RequestEvent) {
-  const q = url.searchParams.get('q')?.trim();
-  if (!q) {
+  const parsedUrl = SearchUrlSchema.safeParse({
+    q: url.searchParams.get('q') ?? undefined,
+    page: url.searchParams.get('page') ?? undefined,
+  });
+  if (!parsedUrl.success) {
+    throw error(400, 'Invalid search URL');
+  }
+
+  const filters = parsedUrl.data.q;
+  if (!filters || !hasSearchFilter(filters)) {
     return;
   }
 
-  const pageString = url.searchParams.get('page') ?? '0';
-  let page = Number.parseInt(pageString, 10);
-  if (Number.isNaN(page)) {
-    page = 0;
-  }
+  const page = parsedUrl.data.page ?? 0;
+  const q = searchTextCodec.encode(filters);
 
   try {
-    const result = await search({
-      ...parseQuery(q),
-      kind: 1,
-      limit: 100,
-      sort: 'time',
-      page: page + 1,
-    });
+    const result = await search(createNoteSearchRequest(filters, page));
 
     return { q, page, result };
   } catch (e) {

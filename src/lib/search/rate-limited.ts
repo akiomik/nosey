@@ -1,10 +1,11 @@
 import { HttpTooManyRequestsError } from '$lib/errors';
-import { search } from '$lib/helpers/search';
-import type { SearchQuery, SearchResult } from '$lib/types';
+import { search } from './api';
+import type { SearchApiRequest } from './request';
+import type { SearchResult } from './result';
 
 const MINIMUM_REQUEST_INTERVAL_MS = 1_000;
 
-type Search = (query: Partial<SearchQuery>, signal?: AbortSignal) => Promise<SearchResult>;
+type Search = (request: SearchApiRequest, signal?: AbortSignal) => Promise<SearchResult>;
 
 const abortError = () => new DOMException('The operation was aborted', 'AbortError');
 
@@ -27,7 +28,7 @@ const wait = (durationMs: number, signal?: AbortSignal) =>
   });
 
 export const createRateLimitedSearch = (
-  request: Search = search,
+  performSearch: Search = search,
   minimumIntervalMs = MINIMUM_REQUEST_INTERVAL_MS
 ): Search => {
   let nextRequestAt = 0;
@@ -54,11 +55,11 @@ export const createRateLimitedSearch = (
     return reservation;
   };
 
-  return async (query, signal) => {
+  return async (request, signal) => {
     await reserveRequestSlot(signal);
 
     try {
-      return await request(query, signal);
+      return await performSearch(request, signal);
     } catch (error) {
       if (error instanceof HttpTooManyRequestsError) {
         const retryDelayMs = Math.max(error.retryAfterMs ?? minimumIntervalMs, minimumIntervalMs);
@@ -69,6 +70,4 @@ export const createRateLimitedSearch = (
   };
 };
 
-// All client-side profile suggestion inputs share this coordinator, so their
-// requests respect api.nostr.wine's one-request-per-second limit together.
 export const rateLimitedSearch = createRateLimitedSearch();

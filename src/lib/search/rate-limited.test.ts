@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HttpTooManyRequestsError } from '$lib/errors';
-import type { SearchResult } from '$lib/types';
-import { createRateLimitedSearch } from './rateLimitedSearch';
+import { createRateLimitedSearch } from './rate-limited';
+import type { SearchResult } from './result';
 
 const result: SearchResult = {
   data: [],
