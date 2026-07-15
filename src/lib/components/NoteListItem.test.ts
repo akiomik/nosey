@@ -1,4 +1,4 @@
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { verifyNip05 } from '$lib/nip05';
 import NoteListItem from './NoteListItem.svelte';
@@ -112,5 +112,49 @@ describe('NoteListItem', () => {
 
     expect(container.querySelector('code')).toBeNull();
     expect(mockedVerifyNip05).not.toHaveBeenCalled();
+  });
+
+  describe('long-post collapsing', () => {
+    const withContent = (content: string) => ({ ...note, content });
+
+    it('does not show a "Show more" trigger for short posts', () => {
+      const { queryByRole } = render(NoteListItem, {
+        props: { note: withContent('A short note'), profile: undefined },
+      });
+
+      expect(queryByRole('button', { name: 'Show more' })).toBeNull();
+    });
+
+    it('shows a "Show more" trigger for posts past the length threshold', () => {
+      const { getByRole } = render(NoteListItem, {
+        props: { note: withContent('a'.repeat(600)), profile: undefined },
+      });
+
+      expect(getByRole('button', { name: 'Show more' })).toBeInTheDocument();
+    });
+
+    it('shows a "Show more" trigger for short-caption posts with an embedded image', () => {
+      const { getByRole } = render(NoteListItem, {
+        props: {
+          note: withContent('Check this out https://example.com/photo.png'),
+          profile: undefined,
+        },
+      });
+
+      expect(getByRole('button', { name: 'Show more' })).toBeInTheDocument();
+    });
+
+    it('toggles the trigger label between "Show more" and "Show less" when clicked', async () => {
+      const { getByRole } = render(NoteListItem, {
+        props: { note: withContent('a'.repeat(600)), profile: undefined },
+      });
+
+      const trigger = getByRole('button', { name: 'Show more' });
+      await fireEvent.click(trigger);
+      expect(trigger).toHaveTextContent('Show less');
+
+      await fireEvent.click(trigger);
+      expect(trigger).toHaveTextContent('Show more');
+    });
   });
 });
