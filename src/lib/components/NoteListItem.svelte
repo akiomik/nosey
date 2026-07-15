@@ -2,6 +2,7 @@
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
+  import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/search/nostr';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
 
@@ -13,12 +14,15 @@
   let { note, profile }: Props = $props();
 
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
+  const parseProfileMetadata = (content: string): NostrProfileMetadata | undefined => {
+    const parsed = NostrProfileContentSchema.safeParse(content);
+    return parsed.success ? parsed.data : undefined;
+  };
 
-  let profileContent = $derived(profile ? JSON.parse(profile.content) : undefined);
-  let displayName =
-    $derived(profileContent?.display_name ? profileContent.display_name : undefined);
-  let profileName = $derived(profileContent?.name ? profileContent.name : undefined);
-  let nameOrPubkey = $derived(displayName ?? profileName ?? shorten(note.pubkey));
+  let profileMetadata = $derived(profile ? parseProfileMetadata(profile.content) : undefined);
+  let nameOrPubkey = $derived(
+    profileMetadata?.name || profileMetadata?.display_name || shorten(note.pubkey)
+  );
 
   let noteContent = $derived(note.content
     ?.replaceAll(/nostr:npub1([a-z0-9]{58})/g, '@npub1$1')
@@ -31,7 +35,7 @@
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
-        <ProfileAvatar picture={profileContent?.picture} name={nameOrPubkey} />
+        <ProfileAvatar picture={profileMetadata?.picture ?? ''} name={nameOrPubkey} />
       </div>
 
       <p class="flex-auto font-bold min-w-0 text-ellipsis overflow-hidden">
