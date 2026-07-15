@@ -1,10 +1,6 @@
 import { z } from 'zod';
-import {
-  formatNip05Identifier,
-  NostrProfileContentSchema,
-  NostrProfileMetadataSchema,
-  PubkeySchema,
-} from '$lib/search/nostr';
+import { zostr } from 'zod-nostr';
+import { NostrProfileContentSchema, NostrProfileMetadataSchema } from '$lib/profile';
 import type { SearchResult } from '$lib/search/result';
 
 export type { SearchResult, SearchResultPagination } from '$lib/search/result';
@@ -26,7 +22,7 @@ const NostrProfileContentWithFallbackSchema = NostrProfileContentSchema.catch(
 
 export const MentionItemSchema = z
   .object({
-    pubkey: PubkeySchema,
+    pubkey: zostr.pubkey(),
     content: z.string(),
   })
   .transform(({ pubkey, content }) => {
@@ -37,7 +33,7 @@ export const MentionItemSchema = z
       content,
       name: profile.name || profile.display_name || pubkey,
       picture: profile.picture,
-      nip05: formatNip05Identifier(profile.nip05),
+      nip05: zostr.formatNip05Identifier(profile.nip05),
     };
   });
 

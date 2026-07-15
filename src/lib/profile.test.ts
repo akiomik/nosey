@@ -1,0 +1,29 @@
+import { describe, expect, it } from 'vitest';
+import { zostr } from 'zod-nostr';
+import { NostrProfileContentSchema } from './profile';
+
+describe('Nostr profile metadata', () => {
+  it('uses zod-nostr to validate and format NIP-05 identifiers', () => {
+    expect(zostr.nip05().safeParse('Alice-_.9@example.com').success).toBe(true);
+    expect(zostr.nip05().safeParse('alice+tag@example.com').success).toBe(false);
+    expect(zostr.formatNip05Identifier('_@bob.com')).toBe('bob.com');
+  });
+
+  it('drops malformed profile properties while retaining valid ones', () => {
+    expect(
+      NostrProfileContentSchema.parse(
+        JSON.stringify({
+          name: 42,
+          display_name: ' Alice ',
+          picture: {},
+          nip05: 'alice+tag@example.com',
+          about: 'Ignored by this schema',
+        })
+      )
+    ).toEqual({ name: '', display_name: 'Alice', picture: '', nip05: '' });
+  });
+
+  it.each(['not json', 'null', '[]'])('rejects invalid profile content: %s', (content) => {
+    expect(NostrProfileContentSchema.safeParse(content).success).toBe(false);
+  });
+});

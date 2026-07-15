@@ -2,7 +2,7 @@
   import type * as Nostr from 'nostr-typedef';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
-  import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/search/nostr';
+  import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/profile';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
 
