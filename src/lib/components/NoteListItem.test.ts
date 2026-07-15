@@ -133,15 +133,23 @@ describe('NoteListItem', () => {
       expect(getByRole('button', { name: 'Show more' })).toBeInTheDocument();
     });
 
-    it('shows a "Show more" trigger for short-caption posts with an embedded image', () => {
-      const { getByRole } = render(NoteListItem, {
+    it('does not show a "Show more" trigger for a short-caption post with an image until its rendered height is measured to overflow', () => {
+      // jsdom doesn't lay out elements, so the ResizeObserver that would
+      // normally reveal the trigger for a tall image never fires here. That's
+      // the point: a short image must never get a trigger it doesn't need
+      // (regression test for it being padded out to a fixed height with a
+      // trigger that revealed nothing), and confirming this measurement path
+      // is skipped in this environment is as far as a unit test can go —
+      // whether a genuinely tall image later reveals the trigger is a
+      // layout-dependent behavior verified manually in a real browser.
+      const { queryByRole } = render(NoteListItem, {
         props: {
           note: withContent('Check this out https://example.com/photo.png'),
           profile: undefined,
         },
       });
 
-      expect(getByRole('button', { name: 'Show more' })).toBeInTheDocument();
+      expect(queryByRole('button', { name: 'Show more' })).toBeNull();
     });
 
     it('toggles the trigger label between "Show more" and "Show less" when clicked', async () => {
