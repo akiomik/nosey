@@ -39,10 +39,19 @@
     positioning: {
       // Always open below the caret instead of flipping above when the list
       // grows too tall to fit -- flipping mid-search felt inconsistent.
-      // TODO: with many results and little space below the caret, the menu
-      // can still overflow past the bottom of the viewport; not handled yet.
       placement: 'bottom-start',
       flip: false,
+      // `fixed` (viewport-relative) instead of the default `absolute` so the
+      // menu never contributes to the page's scrollable height when it
+      // extends past the bottom of a short viewport -- with `absolute`, an
+      // overflowing menu grows the whole document instead of just floating
+      // over it.
+      strategy: 'fixed',
+      // Caps the menu to whatever room is actually left in the viewport
+      // (exposed as the --available-height/--available-width CSS vars below)
+      // instead of letting it grow indefinitely with long names or many
+      // results.
+      fitViewport: true,
       // The input has no real DOM node at the caret to anchor to, so anchor to
       // a virtual rect computed from the caret's on-screen position instead.
       // `animationFrame` keeps it in sync while typing or scrolling, since
@@ -63,7 +72,10 @@
 </script>
 
 <div {...popover().getPositionerProps()}>
-  <div {...popover().getContentProps()} class="card preset-tonal-surface p-4 z-[300] mt-2 shadow">
+  <div
+    {...popover().getContentProps()}
+    class="card preset-tonal-surface p-4 z-[300] mt-2 shadow max-w-[min(20rem,var(--available-width,20rem))] max-h-[var(--available-height,50vh)] overflow-y-auto"
+  >
     {#if loading}
       <p class="px-3 py-1.5 opacity-60">Searching...</p>
     {:else if error === 'timeout'}
@@ -83,9 +95,9 @@
               onclick={() => onSelect(item)}
             >
               <ProfileAvatar picture={item.picture} name={item.name} class="w-6 h-6 shrink-0" />
-              <span class="truncate shrink-0">{item.name}</span>
+              <span class="min-w-0 truncate">{item.name}</span>
               {#if item.nip05}
-                <span class="min-w-0 flex-1 truncate flex items-center gap-1">
+                <span class="min-w-0 shrink-[999] truncate flex items-center gap-1">
                   <code class="code truncate">{item.nip05}</code>
                   <Nip05Badge pubkey={item.pubkey} nip05={item.nip05} />
                 </span>
