@@ -4,9 +4,9 @@ import { NostrProfileContentSchema } from './profile';
 
 describe('Nostr profile metadata', () => {
   it('uses zod-nostr to validate and format NIP-05 identifiers', () => {
-    expect(zostr.nip05().safeParse('Alice-_.9@example.com').success).toBe(true);
-    expect(zostr.nip05().safeParse('alice+tag@example.com').success).toBe(false);
-    expect(zostr.formatNip05Identifier('_@bob.com')).toBe('bob.com');
+    expect(zostr.nip05.identifier().safeParse('Alice-_.9@example.com').success).toBe(true);
+    expect(zostr.nip05.identifier().safeParse('alice+tag@example.com').success).toBe(false);
+    expect(zostr.nip05.formatIdentifier('_@bob.com')).toBe('bob.com');
   });
 
   it('drops malformed profile properties while retaining valid ones', () => {
