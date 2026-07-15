@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Collapsible } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
   import { zostr } from 'zod-nostr';
   import { inlineImage } from '$lib/actions/inlineImage';
@@ -14,6 +15,21 @@
   }
 
   let { note, profile }: Props = $props();
+
+  // Roughly the height of 8 lines of body text (the old line-clamp-8 behavior).
+  const COLLAPSED_HEIGHT = 192;
+  // Only posts past this length get wrapped in a Collapsible. Deciding this from
+  // the raw content length (rather than measuring rendered height) keeps short
+  // posts from ever being forced to the collapsed height: Skeleton's Collapsible
+  // sets min-height *and* max-height to `collapsedHeight` while closed, which
+  // would otherwise pad every short post out to the same fixed height.
+  const LONG_CONTENT_THRESHOLD = 500;
+  // Text length alone misses image-only (or short-caption, tall-image) posts,
+  // since the embedded image that inflates the rendered height isn't reflected
+  // in the character count. Same extensions inlineImage looks for.
+  const IMAGE_URL_PATTERN = /https?:\/\/\S+\.(?:jpe?g|png|gif|webp)\b/i;
+
+  let isExpanded = $state(false);
 
   const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
   const parseProfileMetadata = (content: string): NostrProfileMetadata | undefined => {
@@ -31,7 +47,23 @@
     ?.replaceAll(/nostr:nprofile1([a-z0-9]{61,})/g, '@nprofile1$1')
     ?.replaceAll(/nostr:note1([a-z0-9]{58})/g, '@note1$1')
     ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1'));
+  let isLongContent = $derived(
+    (noteContent?.length ?? 0) > LONG_CONTENT_THRESHOLD || IMAGE_URL_PATTERN.test(note.content ?? '')
+  );
 </script>
+
+{#snippet noteContentParagraph(className: string)}
+  <p
+    use:inlineImage={{
+      className: 'my-4 w-full max-w-lg',
+      attributes: { alt: 'Embed image', decoding: 'async', loading: 'lazy' },
+    }}
+    use:linkify={linkifyOpts}
+    class={className}
+  >
+    {noteContent}
+  </p>
+{/snippet}
 
 <div class="card preset-tonal-surface">
   <div class="p-4">
@@ -53,16 +85,25 @@
       <NoteListItemMenu {note} />
     </div>
 
-    <p
-      use:inlineImage={{
-        className: 'my-4 w-full max-w-lg',
-        attributes: { alt: 'Embed image', decoding: 'async', loading: 'lazy' },
-      }}
-      use:linkify={linkifyOpts}
-      class="text-ellipsis overflow-hidden line-clamp-8 mt-4"
-    >
-      {noteContent}
-    </p>
+    {#if isLongContent}
+      <Collapsible
+        defaultOpen={false}
+        collapsedHeight={COLLAPSED_HEIGHT}
+        onOpenChange={(e) => (isExpanded = e.open)}
+        class="mt-4"
+      >
+        <Collapsible.Content
+          class="w-full min-w-0 overflow-hidden transition-[height] duration-300 ease-in-out data-[state=closed]:h-(--collapsed-height) data-[state=open]:h-(--height)"
+        >
+          {@render noteContentParagraph('')}
+        </Collapsible.Content>
+        <Collapsible.Trigger class="btn btn-sm preset-tonal-surface mt-2">
+          {isExpanded ? 'Show less' : 'Show more'}
+        </Collapsible.Trigger>
+      </Collapsible>
+    {:else}
+      {@render noteContentParagraph('mt-4')}
+    {/if}
   </div>
 
   <hr />
