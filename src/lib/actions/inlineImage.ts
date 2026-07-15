@@ -34,6 +34,10 @@ function uniq<T>(xs: T[]): T[] {
   return [...new Set(xs)];
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // TODO: Add `Action` type
 export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
   const mergedOpts = { ...defaultOpts, ...opts };
@@ -54,7 +58,13 @@ export const inlineImage = (node: HTMLElement, opts: Partial<Opts>) => {
       class: mergedOpts.className,
     };
     const tag = mergedOpts.render(mergedOpts.tagName, attributes);
-    text = text.replaceAll(urlString, tag);
+    // Newlines directly surrounding the URL are later turned into visible
+    // `<br>`s by the `linkify` action's `nl2br` option. Authors commonly pad
+    // an image URL with several blank lines, which would otherwise leave a
+    // large empty gap above/below the now-inlined image on top of its own
+    // margin.
+    const pattern = new RegExp(`\\n*${escapeRegExp(urlString)}\\n*`, 'g');
+    text = text.replace(pattern, tag);
   });
 
   node.innerHTML = text;

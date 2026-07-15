@@ -114,6 +114,26 @@ describe('NoteListItem', () => {
     expect(mockedVerifyNip05).not.toHaveBeenCalled();
   });
 
+  it('allows a long display name to shrink and truncate instead of overlapping the menu button', () => {
+    // Regression test: the name span previously had `shrink-0`, which kept it
+    // at its full content width inside the flex header row no matter how
+    // little space was left, so a long name rendered on top of the
+    // three-dot menu button instead of truncating. `shrink-0` disables the
+    // very shrinking that `truncate`'s ellipsis relies on, so a real browser
+    // has to size the flex row before this is layout-verifiable; this test
+    // only pins the class contract that makes shrinking possible again.
+    const { container } = render(NoteListItem, {
+      props: {
+        note,
+        profile: profile(JSON.stringify({ name: 'A'.repeat(80) })),
+      },
+    });
+
+    const nameSpan = container.querySelector('span.font-bold');
+    expect(nameSpan).toHaveClass('truncate');
+    expect(nameSpan).not.toHaveClass('shrink-0');
+  });
+
   describe('long-post collapsing', () => {
     const withContent = (content: string) => ({ ...note, content });
 
