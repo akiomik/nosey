@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { zostr } from 'zod-nostr';
 import { isoDateCodec, type SearchFilters, SearchFiltersSchema } from './filters';
-import { npubCodec } from './nostr';
+
+const npubCodec = zostr.npub();
 
 const knownFilters = new Set(['from', 'since', 'until']);
 

@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { zostr } from 'zod-nostr';
 import { isoDateCodec, SearchFiltersSchema } from './filters';
-import { npubCodec } from './nostr';
 
 const emptyString = z.literal('');
+const npubCodec = zostr.npub();
 
 const optionalNpub = z
   .string()

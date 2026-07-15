@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PubkeySchema } from './nostr';
+import { zostr } from 'zod-nostr';
 
 export const isoDateCodec = z.codec(z.iso.date(), z.date(), {
   decode: (date) => new Date(`${date}T00:00:00.000Z`),
@@ -9,7 +9,7 @@ export const isoDateCodec = z.codec(z.iso.date(), z.date(), {
 export const SearchFiltersSchema = z
   .object({
     query: z.string().trim().min(1).optional(),
-    pubkey: PubkeySchema.optional(),
+    pubkey: zostr.pubkey().optional(),
     since: z.date().optional(),
     until: z.date().optional(),
   })
