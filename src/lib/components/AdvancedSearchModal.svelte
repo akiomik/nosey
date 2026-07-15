@@ -1,10 +1,14 @@
 <script lang="ts">
   import { autocomplete } from '$lib/actions/autocomplete.svelte';
-  import type { AdvancedSearchFormData } from '$lib/types';
+  import {
+    type AdvancedSearchFormData,
+    AdvancedSearchFormSchema,
+  } from '$lib/search/advanced-form';
+  import type { SearchFilters } from '$lib/search/filters';
 
   interface Props {
     onClose: () => void;
-    onSubmit: (form: AdvancedSearchFormData) => void;
+    onSubmit: (filters: SearchFilters) => void;
   }
 
   let { onClose, onSubmit }: Props = $props();
@@ -16,10 +20,35 @@
     since: '',
     until: '',
   });
+  let fieldErrors = $state<Partial<Record<keyof AdvancedSearchFormData, string[]>>>({});
+
+  const formFieldNames = new Set<keyof AdvancedSearchFormData>(['keyword', 'from', 'since', 'until']);
+  const isFormField = (field: unknown): field is keyof AdvancedSearchFormData =>
+    typeof field === 'string' && formFieldNames.has(field as keyof AdvancedSearchFormData);
+
+  const toFieldErrors = (issues: readonly { path: PropertyKey[]; message: string }[]) => {
+    const errors: Partial<Record<keyof AdvancedSearchFormData, string[]>> = {};
+    for (const issue of issues) {
+      const field = issue.path[0];
+      if (!isFormField(field)) {
+        continue;
+      }
+
+      errors[field] = [...(errors[field] ?? []), issue.message];
+    }
+    return errors;
+  };
 
   const handleFormSubmit = (e: Event) => {
     e.preventDefault();
-    onSubmit(formData);
+    const result = AdvancedSearchFormSchema.safeParse(formData);
+    if (!result.success) {
+      fieldErrors = toFieldErrors(result.error.issues);
+      return;
+    }
+
+    fieldErrors = {};
+    onSubmit(result.data);
   };
 </script>
 
@@ -35,6 +64,9 @@
         bind:value={formData.keyword}
         placeholder="All of these words"
       />
+      {#if fieldErrors.keyword}
+        <span class="text-error-500 text-sm">{fieldErrors.keyword[0]}</span>
+      {/if}
     </label>
     <label class="label">
       <span>Author</span>
@@ -47,14 +79,23 @@
           use:autocomplete={{ prefix: '' }}
         />
       </div>
+      {#if fieldErrors.from}
+        <span class="text-error-500 text-sm">{fieldErrors.from[0]}</span>
+      {/if}
     </label>
     <label class="label">
       <span>Since</span>
       <input class="input" type="date" bind:value={formData.since} placeholder="YYYY-MM-DD" />
+      {#if fieldErrors.since}
+        <span class="text-error-500 text-sm">{fieldErrors.since[0]}</span>
+      {/if}
     </label>
     <label class="label">
       <span>Until</span>
       <input class="input" type="date" bind:value={formData.until} placeholder="YYYY-MM-DD" />
+      {#if fieldErrors.until}
+        <span class="text-error-500 text-sm">{fieldErrors.until[0]}</span>
+      {/if}
     </label>
 
     <button type="submit" class="hidden">Submit</button>

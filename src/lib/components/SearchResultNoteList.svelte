@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SearchResult } from '$lib/types';
+  import type { SearchResult } from '$lib/search/result';
 
   interface Props {
     result: SearchResult;

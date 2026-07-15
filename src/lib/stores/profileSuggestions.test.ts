@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HttpTooManyRequestsError } from '$lib/errors';
-import type { SearchResult } from '$lib/types';
+import type { SearchResult } from '$lib/search/result';
 import { type ProfileSuggestionsState, profileSuggestions } from './profileSuggestions';
 
 const emptyResult: SearchResult = {

@@ -1,7 +1,8 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import WS from 'vitest-websocket-mock';
-import type { PageData, SearchResult } from '$lib/types';
+import type { SearchResult } from '$lib/search/result';
+import type { PageData } from '$lib/types';
 import Page from './+page.svelte';
 
 const goto = vi.fn();
