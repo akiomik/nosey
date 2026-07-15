@@ -174,4 +174,33 @@ describe('profileSuggestions', () => {
     unsubscribe();
     suggestions.destroy();
   });
+
+  it('ignores malformed properties and formats root NIP-05 identifiers', async () => {
+    vi.useFakeTimers();
+    const suggestions = profileSuggestions({
+      search: vi.fn().mockResolvedValue(
+        result(
+          JSON.stringify({
+            name: 42,
+            display_name: ' Alice ',
+            picture: {},
+            nip05: '_@bob.com',
+          })
+        )
+      ),
+    });
+    let latest: ProfileSuggestionsState = { loading: false, items: [], error: null };
+    const unsubscribe = suggestions.subscribe((state) => {
+      latest = state;
+    });
+
+    suggestions.search('alice');
+    await vi.advanceTimersByTimeAsync(250);
+
+    expect(latest.items).toEqual([
+      expect.objectContaining({ name: 'Alice', picture: '', nip05: 'bob.com' }),
+    ]);
+    unsubscribe();
+    suggestions.destroy();
+  });
 });

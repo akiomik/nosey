@@ -4,6 +4,63 @@ import { z } from 'zod';
 
 export const PubkeySchema = z.hex().length(64).lowercase();
 
+const NIP05_LOCAL_PART = /^[a-z0-9._-]+$/i;
+
+export const Nip05IdentifierSchema = z.string().superRefine((identifier, ctx) => {
+  const separator = identifier.indexOf('@');
+  if (separator <= 0 || separator !== identifier.lastIndexOf('@')) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid NIP-05 identifier' });
+    return;
+  }
+
+  const localPart = identifier.slice(0, separator);
+  const domain = identifier.slice(separator + 1);
+  if (!NIP05_LOCAL_PART.test(localPart)) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid NIP-05 local part' });
+    return;
+  }
+
+  try {
+    const url = new URL(`https://${domain}`);
+    if (
+      url.host.toLowerCase() !== domain.toLowerCase() ||
+      url.pathname !== '/' ||
+      url.search ||
+      url.hash
+    ) {
+      throw new Error('Invalid NIP-05 domain');
+    }
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid NIP-05 domain' });
+  }
+});
+
+const ProfileMetadataStringSchema = z.string().trim().min(1).catch('');
+
+export const NostrProfileMetadataSchema = z.object({
+  name: ProfileMetadataStringSchema,
+  display_name: ProfileMetadataStringSchema,
+  picture: ProfileMetadataStringSchema,
+  nip05: Nip05IdentifierSchema.catch(''),
+});
+
+export type NostrProfileMetadata = z.output<typeof NostrProfileMetadataSchema>;
+
+export const NostrProfileContentSchema = z
+  .string()
+  .transform((content, ctx) => {
+    try {
+      return JSON.parse(content);
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'Invalid Nostr profile content' });
+      return z.NEVER;
+    }
+  })
+  .pipe(NostrProfileMetadataSchema);
+
+export const formatNip05Identifier = (identifier: string): string =>
+  identifier.startsWith('_@') ? identifier.slice(2) : identifier;
+
 export const NpubSchema = z.string().superRefine((value, ctx) => {
   try {
     const decoded = nip19.decode(value);
