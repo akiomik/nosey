@@ -7,7 +7,7 @@ export const NostrProfileMetadataSchema = z.object({
   name: ProfileMetadataStringSchema,
   display_name: ProfileMetadataStringSchema,
   picture: ProfileMetadataStringSchema,
-  nip05: zostr.nip05().catch(''),
+  nip05: zostr.nip05.identifier().catch(''),
 });
 
 export type NostrProfileMetadata = z.output<typeof NostrProfileMetadataSchema>;

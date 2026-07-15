@@ -33,7 +33,7 @@ export const MentionItemSchema = z
       content,
       name: profile.name || profile.display_name || pubkey,
       picture: profile.picture,
-      nip05: zostr.formatNip05Identifier(profile.nip05),
+      nip05: zostr.nip05.formatIdentifier(profile.nip05),
     };
   });
 
