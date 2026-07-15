@@ -1,4 +1,3 @@
-import type * as Nostr from 'nostr-typedef';
 import {
   catchError,
   distinctUntilChanged,
@@ -14,27 +13,16 @@ import {
 } from 'rxjs';
 import { type Readable, writable } from 'svelte/store';
 import { HttpTooManyRequestsError } from '$lib/errors';
-import {
-  formatNip05Identifier,
-  NostrProfileContentSchema,
-  type NostrProfileMetadata,
-} from '$lib/search/nostr';
 import { rateLimitedSearch } from '$lib/search/rate-limited';
 import { createProfileSuggestionRequest } from '$lib/search/request';
 import type { SearchResult } from '$lib/search/result';
-import type { MentionItem } from '$lib/types';
+import { type MentionItem, MentionItemSchema } from '$lib/types';
 
 const MENU_ITEM_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 250;
 const RATE_LIMIT_MAX_RETRIES = 3;
 const RATE_LIMIT_RETRY_DELAY_MS = 1_000;
 const SEARCH_TIMEOUT_MS = 5_000;
-const emptyProfileMetadata: NostrProfileMetadata = {
-  name: '',
-  display_name: '',
-  picture: '',
-  nip05: '',
-};
 
 export type ProfileSuggestionsState = {
   loading: boolean;
@@ -67,24 +55,6 @@ const retryOnRateLimit = (error: unknown): Observable<number> => {
   }
 
   throw error;
-};
-
-const parseMentionItem = (pubkey: string, content: string): MentionItem => {
-  const profile = NostrProfileContentSchema.safeParse(content);
-  const {
-    name,
-    display_name: displayName,
-    picture,
-    nip05,
-  } = profile.success ? profile.data : emptyProfileMetadata;
-
-  return {
-    pubkey,
-    content,
-    name: name || displayName || pubkey,
-    picture,
-    nip05: formatNip05Identifier(nip05),
-  };
 };
 
 const defaultSearch: ProfileSearch = (query, signal) =>
@@ -135,9 +105,7 @@ export const profileSuggestions = (options: Options = {}): ProfileSuggestions =>
             )
           ),
           map((result) =>
-            result.data
-              .map(({ pubkey, content }: Nostr.Event) => parseMentionItem(pubkey, content))
-              .slice(0, MENU_ITEM_LIMIT)
+            result.data.map((event) => MentionItemSchema.parse(event)).slice(0, MENU_ITEM_LIMIT)
           ),
           catchError((error: unknown) => {
             state.set({
