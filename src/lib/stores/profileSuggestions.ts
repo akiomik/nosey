@@ -14,6 +14,11 @@ import {
 } from 'rxjs';
 import { type Readable, writable } from 'svelte/store';
 import { HttpTooManyRequestsError } from '$lib/errors';
+import {
+  formatNip05Identifier,
+  NostrProfileContentSchema,
+  type NostrProfileMetadata,
+} from '$lib/search/nostr';
 import { rateLimitedSearch } from '$lib/search/rate-limited';
 import { createProfileSuggestionRequest } from '$lib/search/request';
 import type { SearchResult } from '$lib/search/result';
@@ -24,6 +29,12 @@ const SEARCH_DEBOUNCE_MS = 250;
 const RATE_LIMIT_MAX_RETRIES = 3;
 const RATE_LIMIT_RETRY_DELAY_MS = 1_000;
 const SEARCH_TIMEOUT_MS = 5_000;
+const emptyProfileMetadata: NostrProfileMetadata = {
+  name: '',
+  display_name: '',
+  picture: '',
+  nip05: '',
+};
 
 export type ProfileSuggestionsState = {
   loading: boolean;
@@ -59,12 +70,21 @@ const retryOnRateLimit = (error: unknown): Observable<number> => {
 };
 
 const parseMentionItem = (pubkey: string, content: string): MentionItem => {
-  try {
-    const { name, display_name: displayName, picture, nip05 } = JSON.parse(content);
-    return { pubkey, content, name: name ?? displayName ?? pubkey, picture, nip05 };
-  } catch {
-    return { pubkey, content, name: pubkey, picture: '', nip05: '' };
-  }
+  const profile = NostrProfileContentSchema.safeParse(content);
+  const {
+    name,
+    display_name: displayName,
+    picture,
+    nip05,
+  } = profile.success ? profile.data : emptyProfileMetadata;
+
+  return {
+    pubkey,
+    content,
+    name: name || displayName || pubkey,
+    picture,
+    nip05: formatNip05Identifier(nip05),
+  };
 };
 
 const defaultSearch: ProfileSearch = (query, signal) =>
