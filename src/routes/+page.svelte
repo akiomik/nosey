@@ -132,7 +132,7 @@
       pageSize={data.result.pagination.limit}
       page={data.page + 1}
       onPageChange={(e) => handlePage(e.page - 1)}
-      class="mx-auto w-fit flex gap-1"
+      class="mx-auto w-fit max-w-full flex flex-wrap justify-center gap-1"
     >
       <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
       <Pagination.Context>
