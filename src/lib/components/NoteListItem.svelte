@@ -5,11 +5,8 @@
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import { shortenNostrId } from '$lib/nostr';
-  import {
-    NostrProfileContentSchema,
-    type NostrProfileMetadata,
-    resolveProfileDisplayName,
-  } from '$lib/profile';
+  import { hasInlineImageUrl, isNoteContentDefinitelyLong, transformNoteContent } from '$lib/note';
+  import { parseNostrProfileContent, resolveProfileDisplayName } from '$lib/profile';
   import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
@@ -23,42 +20,18 @@
 
   // Roughly the height of 8 lines of body text (the old line-clamp-8 behavior).
   const COLLAPSED_HEIGHT = 192;
-  // Posts past this length are confidently long, so they can be collapsed
-  // immediately from the raw content length without measuring rendered height.
-  const LONG_CONTENT_THRESHOLD = 500;
-  // Text length alone misses image-only (or short-caption, tall-image) posts,
-  // since the embedded image that inflates the rendered height isn't reflected
-  // in the character count. Same extensions inlineImage looks for. Unlike text
-  // length, an image's rendered height isn't known up front, so these posts
-  // start fully open and only collapse once measured to actually exceed
-  // COLLAPSED_HEIGHT — otherwise a short image would be padded out to a taller
-  // box with a "Show more" trigger that reveals nothing new.
-  const IMAGE_URL_PATTERN = /https?:\/\/\S+\.(?:jpe?g|png|gif|webp)\b/i;
-
-  const parseProfileMetadata = (content: string): NostrProfileMetadata | undefined => {
-    const parsed = NostrProfileContentSchema.safeParse(content);
-    return parsed.success ? parsed.data : undefined;
-  };
-
-  let profileMetadata = $derived(profile ? parseProfileMetadata(profile.content) : undefined);
+  let profileMetadata = $derived(profile ? parseNostrProfileContent(profile.content) : undefined);
   let nameOrPubkey = $derived(
     profileMetadata
       ? resolveProfileDisplayName(profileMetadata, shortenNostrId(note.pubkey))
       : shortenNostrId(note.pubkey)
   );
 
-  const transformContent = (content: string | undefined) =>
-    content
-      ?.replaceAll(/nostr:npub1([a-z0-9]{58})/g, '@npub1$1')
-      ?.replaceAll(/nostr:nprofile1([a-z0-9]{61,})/g, '@nprofile1$1')
-      ?.replaceAll(/nostr:note1([a-z0-9]{58})/g, '@note1$1')
-      ?.replaceAll(/nostr:nevent1([a-z0-9]{70,})/g, '@nevent1$1');
-  const isContentDefinitelyLong = (content: string | undefined) =>
-    (transformContent(content)?.length ?? 0) > LONG_CONTENT_THRESHOLD;
-
-  let noteContent = $derived(transformContent(note.content));
-  let isDefinitelyLong = $derived(isContentDefinitelyLong(note.content));
-  let hasImage = $derived(IMAGE_URL_PATTERN.test(note.content ?? ''));
+  let noteContent = $derived(transformNoteContent(note.content));
+  let isDefinitelyLong = $derived(isNoteContentDefinitelyLong(note.content));
+  // Image height is unknown up front, so short-caption image posts begin open
+  // and collapse only after their rendered height is measured.
+  let hasImage = $derived(hasInlineImageUrl(note.content));
   let isLongContent = $derived(isDefinitelyLong || hasImage);
 
   let contentEl: HTMLElement | undefined = $state();
@@ -66,7 +39,7 @@
   // derived above: `note` never changes identity for a mounted list item, so
   // there's nothing to resync.
   // svelte-ignore state_referenced_locally
-  const isDefinitelyLongInitial = isContentDefinitelyLong(note.content);
+  const isDefinitelyLongInitial = isNoteContentDefinitelyLong(note.content);
   let isOpen = $state(!isDefinitelyLongInitial);
   let isCollapsing = $state(isDefinitelyLongInitial);
   let hasAutoCollapsed = false;
