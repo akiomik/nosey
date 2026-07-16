@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import type { MentionItem } from '$lib/types';
+import type { MentionItem } from '$lib/mention';
 import MentionMenu from './MentionMenu.svelte';
 
 // Nip05Badge fetches over the network to verify NIP-05 identifiers; stub out

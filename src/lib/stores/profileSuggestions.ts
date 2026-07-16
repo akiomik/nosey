@@ -13,10 +13,10 @@ import {
 } from 'rxjs';
 import { type Readable, writable } from 'svelte/store';
 import { HttpTooManyRequestsError } from '$lib/errors';
+import { type MentionItem, MentionItemSchema } from '$lib/mention';
 import { rateLimitedSearch } from '$lib/search/rate-limited';
 import { createProfileSuggestionRequest } from '$lib/search/request';
 import type { SearchResult } from '$lib/search/result';
-import { type MentionItem, MentionItemSchema } from '$lib/types';
 
 const MENU_ITEM_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 250;

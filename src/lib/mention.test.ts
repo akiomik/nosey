@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MentionItemSchema } from './types';
+import { MentionItemSchema } from './mention';
 
 const pubkey = 'a'.repeat(64);
 
