@@ -1,6 +1,6 @@
 import { nip19 } from 'nostr-tools';
 import { describe, expect, it } from 'vitest';
-import { AdvancedSearchFormSchema } from './advanced-form';
+import { AdvancedSearchFormSchema } from './AdvancedSearchModal.form';
 
 const mattnNpub = 'npub1937vv2nf06360qn9y8el6d8sevnndy7tuh5nzre4gj05xc32tnwqauhaj6';
 
