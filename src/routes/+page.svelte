@@ -52,9 +52,6 @@
     // or submitted through it, not the query actually shown on screen.
     query = data.q ?? '';
   });
-  $effect(() => {
-    console.debug('data', data);
-  });
 </script>
 
 <svelte:head>
