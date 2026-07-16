@@ -7,8 +7,3 @@ export type PageData = {
   page: number;
   result: SearchResult;
 };
-
-export type Profile = Partial<{
-  display_name: string;
-  name: string;
-}>;
