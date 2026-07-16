@@ -11,13 +11,16 @@ vi.mock('$lib/nip05', async (importOriginal) => ({
   verifyNip05: vi.fn(() => new Promise(() => {})),
 }));
 
-const makeItem = (overrides: Partial<MentionItem> = {}): MentionItem => ({
-  pubkey: 'pubkey1',
-  content: '{}',
-  name: 'Alice',
-  picture: '',
-  nip05: '',
-  ...overrides,
+const makeItem = (
+  overrides: Partial<{ pubkey: string; name: string; picture: string; nip05: string }> = {}
+): MentionItem => ({
+  pubkey: overrides.pubkey ?? 'pubkey1',
+  profile: {
+    name: overrides.name ?? 'Alice',
+    display_name: '',
+    picture: overrides.picture ?? '',
+    nip05: overrides.nip05 ?? '',
+  },
 });
 
 const baseProps = {

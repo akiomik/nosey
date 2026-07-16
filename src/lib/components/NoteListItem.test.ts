@@ -102,7 +102,7 @@ describe('NoteListItem', () => {
     });
 
     expect(container.querySelector('code')?.textContent).toBe('example.com');
-    expect(mockedVerifyNip05).toHaveBeenCalledExactlyOnceWith(note.pubkey, '_@example.com');
+    expect(mockedVerifyNip05).toHaveBeenCalledExactlyOnceWith(note.pubkey, 'example.com');
   });
 
   it('does not show a nip05 identifier or verify when absent from the profile', () => {

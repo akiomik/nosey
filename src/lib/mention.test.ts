@@ -4,7 +4,7 @@ import { MentionItemSchema } from './mention';
 const pubkey = 'a'.repeat(64);
 
 describe('MentionItemSchema', () => {
-  it('normalizes profile metadata for display', () => {
+  it('resolves profile metadata into an IdentifiedProfile', () => {
     expect(
       MentionItemSchema.parse({
         pubkey,
@@ -17,25 +17,19 @@ describe('MentionItemSchema', () => {
       })
     ).toEqual({
       pubkey,
-      content: JSON.stringify({
-        name: ' Alice ',
+      profile: {
+        name: 'Alice',
         display_name: 'Different name',
         picture: 'https://example.com/alice.png',
         nip05: '_@example.com',
-      }),
-      name: 'Alice',
-      picture: 'https://example.com/alice.png',
-      nip05: 'example.com',
+      },
     });
   });
 
-  it('falls back to safe display values for malformed profile content', () => {
+  it('falls back to an empty profile for malformed profile content', () => {
     expect(MentionItemSchema.parse({ pubkey, content: '{not valid json' })).toEqual({
       pubkey,
-      content: '{not valid json',
-      name: pubkey,
-      picture: '',
-      nip05: '',
+      profile: { name: '', display_name: '', picture: '', nip05: '' },
     });
   });
 
@@ -47,10 +41,7 @@ describe('MentionItemSchema', () => {
       })
     ).toEqual({
       pubkey,
-      content: JSON.stringify({ name: 42, display_name: ' Alice ', picture: {}, nip05: 'bad' }),
-      name: 'Alice',
-      picture: '',
-      nip05: '',
+      profile: { name: '', display_name: 'Alice', picture: '', nip05: '' },
     });
   });
 });

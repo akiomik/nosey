@@ -1,6 +1,7 @@
 <script lang="ts">
   import { usePopover } from '@skeletonlabs/skeleton-svelte';
   import type { MentionItem } from '$lib/mention';
+  import { resolveDisplayName, resolveNip05Display } from '$lib/profile';
   import Nip05Badge from './Nip05Badge.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
 
@@ -94,12 +95,16 @@
               onmousedown={(e) => e.preventDefault()}
               onclick={() => onSelect(item)}
             >
-              <ProfileAvatar picture={item.picture} name={item.name} class="w-6 h-6 shrink-0" />
-              <span class="min-w-0 truncate">{item.name}</span>
-              {#if item.nip05}
+              <ProfileAvatar
+                picture={item.profile.picture}
+                name={resolveDisplayName(item)}
+                class="w-6 h-6 shrink-0"
+              />
+              <span class="min-w-0 truncate">{resolveDisplayName(item)}</span>
+              {#if item.profile.nip05}
                 <span class="min-w-0 shrink-[999] truncate flex items-center gap-1">
-                  <code class="code truncate">{item.nip05}</code>
-                  <Nip05Badge pubkey={item.pubkey} nip05={item.nip05} />
+                  <code class="code truncate">{resolveNip05Display(item)}</code>
+                  <Nip05Badge pubkey={item.pubkey} nip05={resolveNip05Display(item)} />
                 </span>
               {/if}
             </button>
