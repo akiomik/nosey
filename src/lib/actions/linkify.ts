@@ -2,6 +2,7 @@ import linkifyHtml from 'linkify-html';
 import 'linkify-plugin-mention';
 // import type { Action } from 'svelte/runtime/action/public';
 import type { Opts } from 'linkifyjs';
+import { shortenNostrId } from '$lib/nostr';
 
 export const linkifyOpts = {
   className: 'underline',
@@ -9,7 +10,7 @@ export const linkifyOpts = {
   rel: 'external noreferrer',
   format: (value: string, type: string) => {
     if (type === 'mention') {
-      return `${value.substring(0, 9)}:${value.substring(value.length - 8, value.length)}`;
+      return shortenNostrId(value);
     }
 
     return value;

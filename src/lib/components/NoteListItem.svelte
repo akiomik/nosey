@@ -4,6 +4,7 @@
   import { zostr } from 'zod-nostr';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
+  import { shortenNostrId } from '$lib/nostr';
   import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/profile';
   import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
@@ -30,7 +31,6 @@
   // box with a "Show more" trigger that reveals nothing new.
   const IMAGE_URL_PATTERN = /https?:\/\/\S+\.(?:jpe?g|png|gif|webp)\b/i;
 
-  const shorten = (id: string) => `${id.substring(0, 9)}:${id.substring(id.length - 8, id.length)}`;
   const parseProfileMetadata = (content: string): NostrProfileMetadata | undefined => {
     const parsed = NostrProfileContentSchema.safeParse(content);
     return parsed.success ? parsed.data : undefined;
@@ -38,7 +38,7 @@
 
   let profileMetadata = $derived(profile ? parseProfileMetadata(profile.content) : undefined);
   let nameOrPubkey = $derived(
-    profileMetadata?.name || profileMetadata?.display_name || shorten(note.pubkey)
+    profileMetadata?.name || profileMetadata?.display_name || shortenNostrId(note.pubkey)
   );
 
   const transformContent = (content: string | undefined) =>
