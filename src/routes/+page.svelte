@@ -53,23 +53,19 @@
 </script>
 
 <svelte:head>
-  {#if seo.isInitial}
-    <title>nosey | A Nostr searcher</title>
-  {:else}
-    <title>{q} - nosey</title>
-  {/if}
-  <meta name="description" content="A Nostr searcher" />
-  <meta name="keywords" content="nostr,search,notes,damus,snort" />
+  <title>{seo.title}</title>
+  <meta name="description" content={seo.description} />
+  <meta name="keywords" content={seo.keywords} />
   <meta property="og:url" content={seo.url} />
-  <meta property="og:title" content={seo.isInitial ? 'nosey' : `${q} - nosey`} />
-  <meta property="og:description" content="A Nostr searcher" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="nosey" />
-  <meta property="og:image" content="https://nosey.vercel.app/ogp.png" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:image" content="https://nosey.vercel.app/favicon.png" />
+  <meta property="og:title" content={seo.ogTitle} />
+  <meta property="og:description" content={seo.description} />
+  <meta property="og:type" content={seo.ogType} />
+  <meta property="og:site_name" content={seo.ogSiteName} />
+  <meta property="og:image" content={seo.ogImage} />
+  <meta name="twitter:card" content={seo.twitterCard} />
+  <meta name="twitter:image" content={seo.twitterImage} />
   <link rel="canonical" href={seo.url} />
-  <JsonLd url={seo.url} isRoot={seo.isInitial} />
+  <JsonLd jsonLd={seo.jsonLd} />
 </svelte:head>
 
 <form
