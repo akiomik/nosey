@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zostr } from 'zod-nostr';
-import { isoDateCodec, SearchFiltersSchema } from './filters';
+import { isoDateCodec, SearchFiltersSchema } from '../search/filters';
 
 const emptyString = z.literal('');
 const npubCodec = zostr.npub();

@@ -1,10 +1,7 @@
 <script lang="ts">
   import { autocomplete } from '$lib/actions/autocomplete.svelte';
-  import {
-    type AdvancedSearchFormData,
-    AdvancedSearchFormSchema,
-  } from '$lib/search/advanced-form';
   import type { SearchFilters } from '$lib/search/filters';
+  import { type AdvancedSearchFormData, AdvancedSearchFormSchema } from './AdvancedSearchModal.form';
 
   interface Props {
     onClose: () => void;
