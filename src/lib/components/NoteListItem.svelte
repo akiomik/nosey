@@ -5,7 +5,11 @@
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
   import { shortenNostrId } from '$lib/nostr';
-  import { NostrProfileContentSchema, type NostrProfileMetadata } from '$lib/profile';
+  import {
+    NostrProfileContentSchema,
+    type NostrProfileMetadata,
+    resolveProfileDisplayName,
+  } from '$lib/profile';
   import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
@@ -38,7 +42,9 @@
 
   let profileMetadata = $derived(profile ? parseProfileMetadata(profile.content) : undefined);
   let nameOrPubkey = $derived(
-    profileMetadata?.name || profileMetadata?.display_name || shortenNostrId(note.pubkey)
+    profileMetadata
+      ? resolveProfileDisplayName(profileMetadata, shortenNostrId(note.pubkey))
+      : shortenNostrId(note.pubkey)
   );
 
   const transformContent = (content: string | undefined) =>
