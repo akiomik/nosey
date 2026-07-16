@@ -9,6 +9,7 @@
   import Alert from '$lib/components/Alert.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
   import NoteList from '$lib/components/NoteList.svelte';
+  import { createSearchPageSeo } from '$lib/seo';
   import type { PageData } from '$lib/types';
 
   interface Props {
@@ -41,10 +42,7 @@
   };
 
   let q = $derived(data.q ?? '');
-  let page = $derived(data.page === 0 ? undefined : data.page);
-  let params = $derived(page ? new URLSearchParams({ q, page: page.toString() }) : new URLSearchParams({ q }));
-  let isInitial = $derived(q === '');
-  let url = $derived(`https://nosey.vercel.app${isInitial ? '' : `/${params}`}`);
+  let seo = $derived(createSearchPageSeo(q, data.page));
   $effect(() => {
     // Resync the input's local edit buffer whenever the URL's `q` changes from
     // somewhere other than this form (a link, pagination, browser back/forward).
@@ -55,31 +53,31 @@
 </script>
 
 <svelte:head>
-  {#if isInitial}
+  {#if seo.isInitial}
     <title>nosey | A Nostr searcher</title>
   {:else}
     <title>{q} - nosey</title>
   {/if}
   <meta name="description" content="A Nostr searcher" />
   <meta name="keywords" content="nostr,search,notes,damus,snort" />
-  <meta property="og:url" content={url} />
-  <meta property="og:title" content={isInitial ? 'nosey' : `{q} - nosey`} />
+  <meta property="og:url" content={seo.url} />
+  <meta property="og:title" content={seo.isInitial ? 'nosey' : `${q} - nosey`} />
   <meta property="og:description" content="A Nostr searcher" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="nosey" />
   <meta property="og:image" content="https://nosey.vercel.app/ogp.png" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:image" content="https://nosey.vercel.app/favicon.png" />
-  <link rel="canonical" href={url} />
-  <JsonLd {url} isRoot={isInitial} />
+  <link rel="canonical" href={seo.url} />
+  <JsonLd url={seo.url} isRoot={seo.isInitial} />
 </svelte:head>
 
 <form
   onsubmit={handleSearch}
   class="flex flex-col gap-6 justify-center items-center"
-  class:flex-1={isInitial}
+  class:flex-1={seo.isInitial}
 >
-  {#if isInitial}
+  {#if seo.isInitial}
     <h1 class="h1">nosey</h1>
     <p>A nostr searcher</p>
   {/if}
@@ -102,7 +100,7 @@
     </div>
   </div>
 
-  {#if isInitial}
+  {#if seo.isInitial}
     <Alert>
       <div class="flex gap-1">
         <p><b>Tips:</b></p>
