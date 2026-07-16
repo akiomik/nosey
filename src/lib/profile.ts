@@ -12,6 +12,9 @@ export const NostrProfileMetadataSchema = z.object({
 
 export type NostrProfileMetadata = z.output<typeof NostrProfileMetadataSchema>;
 
+export const resolveProfileDisplayName = (metadata: NostrProfileMetadata, fallback: string) =>
+  metadata.name || metadata.display_name || fallback;
+
 // zostr.nip01.metadata() is intentionally strict. Search results may contain
 // partial profile metadata, so retain this UI-specific fallback behavior here.
 export const NostrProfileContentSchema = z
