@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { zostr } from 'zod-nostr';
-import { NostrProfileContentSchema, resolveProfileDisplayName } from './profile';
+import {
+  NostrProfileContentSchema,
+  parseNostrProfileContent,
+  resolveProfileDisplayName,
+} from './profile';
 
 describe('Nostr profile metadata', () => {
   it('uses zod-nostr to validate and format NIP-05 identifiers', () => {
@@ -45,5 +49,12 @@ describe('Nostr profile metadata', () => {
     expect(resolveProfileDisplayName(NostrProfileContentSchema.parse('{}'), 'fallback')).toBe(
       'fallback'
     );
+  });
+
+  it('returns undefined for invalid profile content', () => {
+    expect(parseNostrProfileContent('not json')).toBeUndefined();
+    expect(parseNostrProfileContent(JSON.stringify({ name: 'Alice' }))).toMatchObject({
+      name: 'Alice',
+    });
   });
 });

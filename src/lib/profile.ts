@@ -28,3 +28,8 @@ export const NostrProfileContentSchema = z
     }
   })
   .pipe(NostrProfileMetadataSchema);
+
+export const parseNostrProfileContent = (content: string): NostrProfileMetadata | undefined => {
+  const parsed = NostrProfileContentSchema.safeParse(content);
+  return parsed.success ? parsed.data : undefined;
+};
