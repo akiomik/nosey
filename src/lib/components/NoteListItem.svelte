@@ -1,12 +1,10 @@
 <script lang="ts">
   import { Collapsible } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
-  import { zostr } from 'zod-nostr';
   import { inlineImage } from '$lib/actions/inlineImage';
   import { linkify, linkifyOpts } from '$lib/actions/linkify';
-  import { shortenNostrId } from '$lib/nostr';
   import { hasInlineImageUrl, isNoteContentDefinitelyLong, transformNoteContent } from '$lib/note';
-  import { parseNostrProfileContent, resolveProfileDisplayName } from '$lib/profile';
+  import { resolveDisplayName, resolveIdentifiedProfile, resolveNip05Display } from '$lib/profile';
   import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
@@ -20,12 +18,8 @@
 
   // Roughly the height of 8 lines of body text (the old line-clamp-8 behavior).
   const COLLAPSED_HEIGHT = 192;
-  let profileMetadata = $derived(profile ? parseNostrProfileContent(profile.content) : undefined);
-  let nameOrPubkey = $derived(
-    profileMetadata
-      ? resolveProfileDisplayName(profileMetadata, shortenNostrId(note.pubkey))
-      : shortenNostrId(note.pubkey)
-  );
+  let identified = $derived(resolveIdentifiedProfile(note.pubkey, profile?.content));
+  let nameOrPubkey = $derived(resolveDisplayName(identified));
 
   let noteContent = $derived(transformNoteContent(note.content));
   let isDefinitelyLong = $derived(isNoteContentDefinitelyLong(note.content));
@@ -89,15 +83,15 @@
   <div class="p-4">
     <div class="flex justify-between items-center">
       <div class="mr-2 flex-none">
-        <ProfileAvatar picture={profileMetadata?.picture ?? ''} name={nameOrPubkey} />
+        <ProfileAvatar picture={identified.profile.picture} name={nameOrPubkey} />
       </div>
 
       <p class="flex-auto min-w-0 flex items-center gap-1">
         <span class="font-bold truncate min-w-0">{nameOrPubkey}</span>
-        {#if profileMetadata?.nip05}
+        {#if identified.profile.nip05}
           <span class="min-w-0 flex-1 truncate flex items-center gap-1">
-            <code class="code truncate overflow-x-hidden!">{zostr.nip05.formatIdentifier(profileMetadata.nip05)}</code>
-            <Nip05Badge pubkey={note.pubkey} nip05={profileMetadata.nip05} />
+            <code class="code truncate overflow-x-hidden!">{resolveNip05Display(identified)}</code>
+            <Nip05Badge pubkey={note.pubkey} nip05={resolveNip05Display(identified)} />
           </span>
         {/if}
       </p>

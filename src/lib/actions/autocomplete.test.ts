@@ -15,10 +15,7 @@ import AutocompleteTestHost from './AutocompleteTestHost.svelte';
 
 const makeItem = (pubkey: string, name: string): MentionItem => ({
   pubkey,
-  content: JSON.stringify({ name }),
-  name,
-  picture: '',
-  nip05: '',
+  profile: { name, display_name: '', picture: '', nip05: '' },
 });
 
 const createSuggestions = () => {

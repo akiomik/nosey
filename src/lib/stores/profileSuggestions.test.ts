@@ -54,7 +54,7 @@ describe('profileSuggestions', () => {
     expect(search).toHaveBeenCalledWith('alice', expect.any(AbortSignal));
     expect(latest).toEqual({
       loading: false,
-      items: [expect.objectContaining({ name: 'Alice' })],
+      items: [expect.objectContaining({ profile: expect.objectContaining({ name: 'Alice' }) })],
       error: null,
     });
 
@@ -156,21 +156,23 @@ describe('profileSuggestions', () => {
     suggestions.destroy();
   });
 
-  it('falls back to the pubkey for malformed profile JSON', async () => {
+  it('falls back to a shortened pubkey for malformed profile JSON', async () => {
     vi.useFakeTimers();
     const pubkey = 'd'.repeat(64);
     const suggestions = profileSuggestions({
       search: vi.fn().mockResolvedValue(result('{not valid json', pubkey)),
     });
-    let latestName = '';
+    let latest: ProfileSuggestionsState = { loading: false, items: [], error: null };
     const unsubscribe = suggestions.subscribe((state) => {
-      latestName = state.items[0]?.name ?? '';
+      latest = state;
     });
 
     suggestions.search('alice');
     await vi.advanceTimersByTimeAsync(250);
 
-    expect(latestName).toBe(pubkey);
+    expect(latest.items).toEqual([
+      { pubkey, profile: { name: '', display_name: '', picture: '', nip05: '' } },
+    ]);
     unsubscribe();
     suggestions.destroy();
   });
@@ -198,7 +200,14 @@ describe('profileSuggestions', () => {
     await vi.advanceTimersByTimeAsync(250);
 
     expect(latest.items).toEqual([
-      expect.objectContaining({ name: 'Alice', picture: '', nip05: 'bob.com' }),
+      expect.objectContaining({
+        profile: expect.objectContaining({
+          name: '',
+          display_name: 'Alice',
+          picture: '',
+          nip05: '_@bob.com',
+        }),
+      }),
     ]);
     unsubscribe();
     suggestions.destroy();
