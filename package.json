@@ -30,7 +30,7 @@
     "nostr-typedef": "^0.13.0",
     "playwright": "^1.61.1",
     "svelte": "^5.0.0",
-    "svelte-check": "^4.7.2",
+    "svelte-check": "^4.7.3",
     "tailwindcss": "^4.3.2",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
