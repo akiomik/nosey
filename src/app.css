@@ -9,7 +9,7 @@
 .select,
 .input,
 .textarea,
-.input-group {
+.field-group {
   background-color: var(--color-surface-50-950);
   color: var(--color-surface-950-50);
 }

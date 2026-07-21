@@ -48,21 +48,21 @@
           onclick={() => copyToClipboardWithToast(npub, 'npub1')}
           class={itemClass}
         >
-          Copy <code class="code ml-1">npub1</code>
+          Copy <code class="ml-1">npub1</code>
         </Menu.Item>
         <Menu.Item
           value="copy-note-id"
           onclick={() => copyToClipboardWithToast(noteId, 'note1 id')}
           class={itemClass}
         >
-          Copy <code class="code mx-1">note1</code> id
+          Copy <code class="mx-1">note1</code> id
         </Menu.Item>
         <Menu.Item
           value="copy-nevent-id"
           onclick={() => copyToClipboardWithToast(nevent, 'nevent1 id')}
           class={itemClass}
         >
-          Copy <code class="code mx-1">nevent1</code> id
+          Copy <code class="mx-1">nevent1</code> id
         </Menu.Item>
         <Menu.Item
           value="copy-text"
