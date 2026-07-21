@@ -90,7 +90,7 @@
         <span class="font-bold truncate min-w-0">{nameOrPubkey}</span>
         {#if identified.profile.nip05}
           <span class="min-w-0 flex-1 truncate flex items-center gap-1">
-            <code class="code truncate overflow-x-hidden!">{resolveNip05Display(identified)}</code>
+            <code class="truncate overflow-x-hidden!">{resolveNip05Display(identified)}</code>
             <Nip05Badge pubkey={note.pubkey} nip05={resolveNip05Display(identified)} />
           </span>
         {/if}

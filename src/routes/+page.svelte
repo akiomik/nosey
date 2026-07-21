@@ -79,18 +79,18 @@
   {/if}
 
   <div class="relative w-full">
-    <div class="input-group grid-cols-[1fr_auto]">
+    <div class="field-group grid-cols-[1fr_auto] gap-0">
       <!-- svelte-ignore a11y_autofocus -->
       <input
         type="search"
-        class="ig-input"
+        class="input"
         value={q}
         aria-label="search"
         oninput={handleQuery}
         use:autocomplete={{ prefix: 'from:' }}
         autofocus
       />
-      <button type="submit" class="ig-btn preset-filled-primary-500">
+      <button type="submit" class="btn preset-filled-primary-500">
         <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
       </button>
     </div>
@@ -102,12 +102,12 @@
         <p><b>Tips:</b></p>
         <div>
           <p>
-            By using <code class="code">from:npub...</code> directive you can filter notes by author.
+            By using <code>from:npub...</code> directive you can filter notes by author.
           </p>
           <p>
-            And you can auto-complete npub by typing <code class="code">from:@</code>
+            And you can auto-complete npub by typing <code>from:@</code>
             (e.g.
-            <a href={`/?q=${encodeURI(mattnQuery)}`}><code class="code">from:@mattn</code></a>)
+            <a href={`/?q=${encodeURI(mattnQuery)}`}><code>from:@mattn</code></a>)
           </p>
         </div>
       </div>

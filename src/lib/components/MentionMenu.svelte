@@ -103,7 +103,7 @@
               <span class="min-w-0 truncate">{resolveDisplayName(item)}</span>
               {#if item.profile.nip05}
                 <span class="min-w-0 shrink-[999] truncate flex items-center gap-1">
-                  <code class="code truncate">{resolveNip05Display(item)}</code>
+                  <code class="truncate">{resolveNip05Display(item)}</code>
                   <Nip05Badge pubkey={item.pubkey} nip05={resolveNip05Display(item)} />
                 </span>
               {/if}
