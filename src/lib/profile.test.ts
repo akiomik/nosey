@@ -11,7 +11,7 @@ const pubkey = 'a'.repeat(64);
 
 describe('Nostr profile metadata', () => {
   it('uses zod-nostr to validate and format NIP-05 identifiers', () => {
-    expect(zostr.nip05.identifier().safeParse('Alice-_.9@example.com').success).toBe(true);
+    expect(zostr.nip05.identifier().safeParse('alice-_.9@example.com').success).toBe(true);
     expect(zostr.nip05.identifier().safeParse('alice+tag@example.com').success).toBe(false);
     expect(zostr.nip05.formatIdentifier('_@bob.com')).toBe('bob.com');
   });
@@ -28,6 +28,15 @@ describe('Nostr profile metadata', () => {
         })
       )
     ).toEqual({ name: '', display_name: 'Alice', picture: '', nip05: '' });
+  });
+
+  it('keeps a valid picture URL but drops a non-URL one', () => {
+    expect(
+      ProfileContentSchema.parse(JSON.stringify({ picture: 'https://example.com/avatar.png' }))
+    ).toMatchObject({ picture: 'https://example.com/avatar.png' });
+    expect(ProfileContentSchema.parse(JSON.stringify({ picture: 'not a url' }))).toMatchObject({
+      picture: '',
+    });
   });
 
   it.each(['not json', 'null', '[]'])('rejects invalid profile content: %s', (content) => {

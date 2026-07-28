@@ -2,13 +2,19 @@ import { z } from 'zod';
 import { zostr } from 'zod-nostr';
 import { shortenNostrId } from './nostr';
 
-const ProfileMetadataStringSchema = z.string().trim().min(1).catch('');
+const { metadataFields } = zostr.nip01;
+
+// zod-nostr's metadataFields atoms are strict and non-optional. Search results
+// and note authors may carry partial or malformed profile metadata, so layer a
+// display-oriented recovery policy on top: trim, drop empties, and fall back to
+// '' instead of failing the whole profile.
+const displayString = (schema: z.ZodString) => schema.trim().min(1).catch('');
 
 export const ProfileSchema = z.object({
-  name: ProfileMetadataStringSchema,
-  display_name: ProfileMetadataStringSchema,
-  picture: ProfileMetadataStringSchema,
-  nip05: zostr.nip05.identifier().catch(''),
+  name: displayString(metadataFields.name()),
+  display_name: displayString(metadataFields.displayName()),
+  picture: metadataFields.picture().catch(''),
+  nip05: metadataFields.nip05().catch(''),
 });
 
 export type Profile = z.output<typeof ProfileSchema>;
@@ -18,20 +24,9 @@ export type Profile = z.output<typeof ProfileSchema>;
 // compute and pass that fallback themselves.
 export type IdentifiedProfile = { pubkey: string; profile: Profile };
 
-// zostr.nip01.metadata() is intentionally strict. Search results and note
-// authors may carry partial or malformed profile metadata, so retain this
-// UI-specific fallback behavior here.
-export const ProfileContentSchema = z
-  .string()
-  .transform((content, ctx) => {
-    try {
-      return JSON.parse(content);
-    } catch {
-      ctx.addIssue({ code: 'custom', message: 'Invalid Nostr profile content' });
-      return z.NEVER;
-    }
-  })
-  .pipe(ProfileSchema);
+// Codec between a kind:0 `content` string (JSON) and the profile object.
+// Invalid JSON, or JSON that isn't a profile object, surfaces as a Zod issue.
+export const ProfileContentSchema = zostr.jsonCodec(ProfileSchema);
 
 const emptyProfile = ProfileSchema.parse({});
 const ProfileContentWithFallbackSchema = ProfileContentSchema.catch(emptyProfile);
