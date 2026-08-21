@@ -2,10 +2,16 @@ import type * as Nostr from 'nostr-typedef';
 import { z } from 'zod';
 import { zostr } from 'zod-nostr';
 
-export const VerifiedNostrEventSchema = zostr
-  .event()
-  .check(zostr.signatureCheck())
-  .transform(({ id, pubkey, created_at, kind, tags, content, sig }) => ({
+// zostr.event() rejects unknown keys, but the search API decorates each event
+// with response-specific fields (a relevance `score`, for one). Rebuilding it
+// as a plain z.object keeps zod-nostr's field validation while stripping those
+// extras instead of failing the whole response.
+const NostrEventSchema = z.object(zostr.event().shape);
+
+// The trailing transform rebuilds the event because signature verification
+// stamps a cache symbol onto the object it checks.
+export const VerifiedNostrEventSchema = NostrEventSchema.check(zostr.signatureCheck()).transform(
+  ({ id, pubkey, created_at, kind, tags, content, sig }) => ({
     id,
     pubkey,
     created_at,
@@ -13,7 +19,8 @@ export const VerifiedNostrEventSchema = zostr
     tags,
     content,
     sig,
-  }));
+  })
+);
 
 export const SearchResultPaginationSchema = z.object({
   last_page: z.boolean(),
