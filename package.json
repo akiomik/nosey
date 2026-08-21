@@ -24,7 +24,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/svelte": "^5.4.2",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "jsdom": "^30.0.0",
     "msw": "^2.15.0",
     "nostr-typedef": "^0.13.0",
