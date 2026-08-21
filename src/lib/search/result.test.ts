@@ -35,6 +35,15 @@ describe('search result schemas', () => {
     ).toBe(false);
   });
 
+  it('rejects an event carrying an empty tag', () => {
+    const event = finalizeEvent(
+      { kind: 1, created_at: 1_704_067_200, tags: [[]], content: 'hello' },
+      generateSecretKey()
+    );
+
+    expect(VerifiedNostrEventSchema.safeParse(event).success).toBe(false);
+  });
+
   it('strips fields that are not part of a Nostr event', () => {
     const event = signedEvent();
     const parsed = VerifiedNostrEventSchema.parse({ ...event, score: 0 });
