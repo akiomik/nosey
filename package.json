@@ -28,7 +28,7 @@
     "jsdom": "^30.0.1",
     "msw": "^2.15.0",
     "nostr-typedef": "^0.13.0",
-    "playwright": "^1.62.1",
+    "playwright": "^1.63.0",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
     "tailwindcss": "^4.3.2",
