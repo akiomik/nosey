@@ -24,20 +24,20 @@ const server = setupServer(
   )
 );
 
-// msw also intercepts WebSocket, installing a read-only global that
-// mock-socket (behind `vitest-websocket-mock`) then fails to overwrite. Only
-// HTTP interception is wanted here, so capture the constructor msw is about to
-// replace and put it back -- writable this time -- once msw has started.
-const NativeWebSocket = globalThis.WebSocket;
+// msw also intercepts WebSocket, replacing jsdom's accessor with a read-only
+// data property that mock-socket (behind `vitest-websocket-mock`) then fails
+// to assign over. Only HTTP interception is wanted here, so take a copy of the
+// descriptor msw is about to overwrite and put it back once msw has started.
+// Restoring the accessor itself, rather than a stand-in, leaves mock-socket
+// assigning through the same setter it uses when msw is not involved.
+const nativeWebSocket = Object.getOwnPropertyDescriptor(globalThis, 'WebSocket');
+if (!nativeWebSocket) {
+  throw new Error('expected the test environment to define a WebSocket global');
+}
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
-  Object.defineProperty(globalThis, 'WebSocket', {
-    value: NativeWebSocket,
-    writable: true,
-    enumerable: true,
-    configurable: true,
-  });
+  Object.defineProperty(globalThis, 'WebSocket', nativeWebSocket);
 });
 afterAll(() => server.close());
 
