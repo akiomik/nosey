@@ -8,20 +8,22 @@ import { profileStore } from './profileStore';
 
 // `vitest-websocket-mock` only mocks the WebSocket side. rx-nostr separately
 // fetches each relay's NIP-11 document over plain HTTPS and blocks the REQ on
-// the answer, so without these handlers the tests reach the real relays and
-// hang for as long as those hosts take to reply -- see issue #406. An empty
-// document leaves `limitation.max_subscriptions` undefined, which is how
-// rx-nostr behaves against a relay that serves no NIP-11 anyway.
+// the answer, so without msw the tests reach the real relays and hang for as
+// long as those hosts take to reply -- see issue #406.
+//
+// The handlers name the three documents rx-nostr asks for and answer with an
+// empty one, which leaves `limitation.max_subscriptions` undefined -- how
+// rx-nostr treats a relay serving no NIP-11 anyway. They document the traffic
+// rather than hold it back: `onUnhandledRequest: 'error'` is what keeps a
+// request off the network, and `fetchRelayInfo` turns any failure into that
+// same empty document. So a relay added to `profileStore.ts` without a handler
+// here stays offline and fast, just undocumented.
 const server = setupServer(
   ...['https://relay.damus.io/', 'https://nos.lol/', 'https://yabu.me/'].map((url) =>
     http.get(url, () => HttpResponse.json({}))
   )
 );
 
-// `error` keeps any request this file does not stub from reaching the network.
-// rx-nostr swallows a failed NIP-11 fetch, so adding a relay without a handler
-// stays green rather than erroring -- but it stays offline and fast, which is
-// what matters here.
 // msw also intercepts WebSocket, installing a read-only global that
 // mock-socket (behind `vitest-websocket-mock`) then fails to overwrite. Only
 // HTTP interception is wanted here, so capture the constructor msw is about to
