@@ -12,19 +12,32 @@ updates:
     # Dependencies that constrain each other are updated in one pull request, so
     # a bump that only works alongside its siblings is never proposed on its
     # own. The line is drawn at the tight constraints -- an exact pin, a
-    # single-major peer range, a lockstep release train, or a type that has to
-    # resolve to one copy -- and not at the loose ones, where a package can lag
-    # a release without breaking: `vitest` and `@tailwindcss/vite` accept vite
-    # `^6 || ^7 || ^8`, and `typescript` is peered by `svelte-check`, `msw` and
-    # `nostr-tools` over ranges just as wide. Those edges do cross a group
-    # boundary, and one day a major will land on the far side of one; that costs
-    # a single follow-up pull request, where drawing every group around them
-    # would leave one group holding the whole dev tree.
+    # single-major peer range, a lockstep release train, or a type or stylesheet
+    # that has to resolve to one copy -- and not at the loose ones, where a
+    # package can lag a release without breaking.
     #
     # Anything not named below is updated on its own, so an update that turns
     # out to be unmergeable holds up only itself. Groups cover version updates;
     # security updates stay ungrouped so a fix is never blocked by an unrelated
     # one.
+    #
+    # Three tight edges are left crossing a group boundary on purpose, because
+    # closing them would leave one group holding most of the dev tree:
+    #
+    #   - `vite` sits in the svelte group, but `vitest` peers it at
+    #     `^6 || ^7 || ^8` and `@tailwindcss/vite` at `^5.2.0 || ^6 || ^7 || ^8`.
+    #   - `@testing-library/jest-dom` peers `@testing-library/dom` at
+    #     `>=10 <11`, while `@testing-library/svelte` depends on it at
+    #     `9.x.x || 10.x.x` from the svelte group.
+    #   - `@skeletonlabs/*` peers `tailwindcss ^4.0.0` and `svelte ^5.40.0`.
+    #     Skeleton ships support for a framework major after that major lands,
+    #     so this edge cannot be closed by ordering -- grouping Skeleton with
+    #     either framework would park that framework behind Skeleton.
+    #
+    # When a major does land on the far side of one of these, the group pull
+    # request holding the other end is blocked until both sides catch up. That
+    # is a real cost, not a follow-up commit, and it is the reason the cuts are
+    # placed at the widest peer ranges rather than the narrowest.
     groups:
       fortawesome:
         # The icon packages and the core ship in lockstep. The svelte peer on
@@ -53,33 +66,41 @@ updates:
           - 'nostr-typedef'
           - 'zod'
           - 'zod-nostr'
+      skeleton:
+        # One monorepo on one version line, and skeleton-svelte pins
+        # @skeletonlabs/skeleton-common exactly. src/app.css imports both, and
+        # the components' markup is written against the core package's classes
+        # and design tokens -- a coupling no peer range declares, so half of
+        # Skeleton on v5 and half on v6 breaks the styling with a clean install.
+        patterns:
+          - '@skeletonlabs/*'
       svelte:
         # @sveltejs/vite-plugin-svelte peers svelte `^5.46.4` and vite `^8.0.0`,
         # both a single major, so those three move together; @sveltejs/kit peers
-        # all of them. svelte-check, @skeletonlabs/skeleton-svelte and
-        # @testing-library/svelte each peer svelte over a range that ends at the
-        # current major.
+        # all of them. svelte-check and @testing-library/svelte each peer svelte
+        # over a range that ends at the current major -- for
+        # @testing-library/svelte that is the real constraint, since its vitest
+        # peer is `*`.
         patterns:
           - 'svelte'
           - 'svelte-check'
           - '@sveltejs/*'
-          - '@skeletonlabs/skeleton-svelte'
           - '@testing-library/svelte'
           - 'vite'
       tailwind:
-        # @tailwindcss/* ships in lockstep with tailwindcss, and
-        # @skeletonlabs/skeleton peers `tailwindcss ^4.0.0` -- its only peer, so
-        # it belongs here rather than with the rest of the Skeleton scope.
+        # @tailwindcss/vite depends on tailwindcss at an exact version
+        # (`4.3.3`), so the two ship together. @tailwindcss/forms is not in the
+        # group: it is versioned independently (`0.5.x`) and peers
+        # `tailwindcss >=3.0.0`, so grouping it would only let a blocked
+        # tailwindcss bump hold up its patches.
         patterns:
           - 'tailwindcss'
-          - '@tailwindcss/*'
-          - '@skeletonlabs/skeleton'
+          - '@tailwindcss/vite'
       vitest:
         # @testing-library/jest-dom augments vitest's own `Assertion` interface,
         # so a vitest major that changes its shape needs a matching jest-dom
         # (testing-library/jest-dom#738), and vitest-websocket-mock@0.8.0 peers
-        # `vitest >=5 <6`. @testing-library/svelte is deliberately not here: its
-        # vitest peer is `*`, and svelte is what actually constrains it.
+        # `vitest >=5 <6`.
         patterns:
           - 'vitest'
           - '@vitest/*'
