@@ -17,15 +17,6 @@ updates:
     # copy. Everything else is updated on its own, so an unmergeable update
     # holds up only itself.
     #
-    # What grouping does not do is make Dependabot offer an update the manifest
-    # currently forbids. Each member is resolved against the manifest as it
-    # stands, so a release whose peers are not yet satisfiable is skipped
-    # rather than pulled in behind the sibling that would satisfy it -- when
-    # vitest 5 was proposed, vitest-websocket-mock 0.8.0, which peers vitest 5,
-    # was left out and has to wait for the run after vitest 5 lands. What the
-    # group buys is the other direction: updates that are each installable on
-    # their own but wrong apart arrive as one pull request and one CI run.
-    #
     # The graph is not a forest, so some of those ties necessarily cross a group
     # boundary. The svelte group owns `vite`, which vitest both depends on and
     # peers and which @tailwindcss/vite peers; @testing-library/jest-dom and
@@ -35,6 +26,15 @@ updates:
     # pull request holding the other end stays blocked until both sides catch
     # up. That is the price of not collapsing svelte, tailwind, skeleton and
     # vitest into one group, where a single bad member blocks all the rest.
+    #
+    # What a group does not do is make Dependabot offer an update the manifest
+    # currently forbids. Each member is resolved against the manifest as it
+    # stands, so a release whose peers are not yet satisfiable is skipped
+    # rather than pulled in behind the sibling that would satisfy it -- when
+    # vitest 5 was proposed, vitest-websocket-mock 0.8.0, which peers vitest 5,
+    # was left out and has to wait for the run after vitest 5 lands. What a
+    # group buys is the other direction: updates that are each installable on
+    # their own but wrong apart arrive as one pull request and one CI run.
     #
     # Groups cover version updates. Security updates stay ungrouped, so a fix is
     # never blocked by an unrelated one.
@@ -95,10 +95,13 @@ updates:
           - '@tailwindcss/vite'
       vitest:
         # @testing-library/jest-dom augments vitest's own `Assertion` interface,
-        # so a vitest major that reshapes it needs a matching jest-dom -- a
-        # coupling expressed only in the types, which no peer range declares.
-        # vitest-websocket-mock is here for the ordinary reason: it peers vitest
-        # at one major.
+        # so a vitest major that reshapes it needs a matching jest-dom. It does
+        # declare a vitest peer, but an optional and open-ended one, which is
+        # why install says nothing about the mismatch and only the type check
+        # catches it. vitest-websocket-mock's peer is open-ended too on the line
+        # this manifest pins; the next line narrows it to a single vitest major,
+        # and keeping the two in one group is what holds them in step once
+        # vitest moves.
         #
         # This binds both ways: while vitest 5 and jest-dom are incompatible
         # (testing-library/jest-dom#738), this group's pull request stays red
