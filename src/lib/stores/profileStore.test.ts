@@ -22,14 +22,18 @@ const server = setupServer(
 // rx-nostr swallows a failed NIP-11 fetch, so adding a relay without a handler
 // stays green rather than erroring -- but it stays offline and fast, which is
 // what matters here.
+// msw also intercepts WebSocket, installing a read-only global that
+// mock-socket (behind `vitest-websocket-mock`) then fails to overwrite. Only
+// HTTP interception is wanted here, so capture the constructor msw is about to
+// replace and put it back -- writable this time -- once msw has started.
+const NativeWebSocket = globalThis.WebSocket;
+
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
-  // msw also intercepts WebSocket, installing a read-only global that
-  // mock-socket (behind `vitest-websocket-mock`) then fails to overwrite.
-  // Only HTTP interception is wanted here, so hand the global back.
   Object.defineProperty(globalThis, 'WebSocket', {
-    value: globalThis.WebSocket,
+    value: NativeWebSocket,
     writable: true,
+    enumerable: true,
     configurable: true,
   });
 });
