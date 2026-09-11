@@ -9,50 +9,79 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
-    # Packages that constrain each other through peer dependencies are updated
-    # in one pull request, so a bump that only works alongside its siblings is
-    # never proposed on its own. Packages with no such constraint are left
-    # ungrouped, so an update that turns out to be unmergeable holds up only
-    # itself. Groups cover version updates only; security updates stay
-    # ungrouped so a fix is never blocked by an unrelated one.
+    # Dependencies that constrain each other are updated in one pull request, so
+    # a bump that only works alongside its siblings is never proposed on its
+    # own. The line is drawn at the tight constraints -- an exact pin, a
+    # single-major peer range, a lockstep release train, or a type that has to
+    # resolve to one copy -- and not at the loose ones, where a package can lag
+    # a release without breaking: `vitest` and `@tailwindcss/vite` accept vite
+    # `^6 || ^7 || ^8`, and `typescript` is peered by `svelte-check`, `msw` and
+    # `nostr-tools` over ranges just as wide. Those edges do cross a group
+    # boundary, and one day a major will land on the far side of one; that costs
+    # a single follow-up pull request, where drawing every group around them
+    # would leave one group holding the whole dev tree.
+    #
+    # Anything not named below is updated on its own, so an update that turns
+    # out to be unmergeable holds up only itself. Groups cover version updates;
+    # security updates stay ungrouped so a fix is never blocked by an unrelated
+    # one.
     groups:
       fortawesome:
+        # The icon packages and the core ship in lockstep. The svelte peer on
+        # @fortawesome/svelte-fontawesome is a loose `~3 || ~4 || ~5`, so it
+        # stays here rather than with svelte.
         patterns:
           - '@fortawesome/*'
       linkify:
-        # linkify-html and linkify-plugin-mention pin linkifyjs exactly.
+        # linkify-html and linkify-plugin-mention pin linkifyjs exactly
+        # (`==4.3.3`).
         patterns:
           - 'linkifyjs'
           - 'linkify-*'
-      rx-nostr:
-        # @rx-nostr/crypto declares a `~3` peer on rx-nostr.
+      nostr:
+        # These carry each other's types across the API boundary, so each has to
+        # resolve to one copy: rx-nostr and @rx-nostr/crypto both depend on
+        # nostr-typedef and rx-nostr on rxjs, while zod-nostr depends on
+        # nostr-tools and peers zod. Bumping one alone installs a second copy
+        # beside the old one, and TypeScript treats the two as unrelated types.
+        # @rx-nostr/crypto also peers rx-nostr at `~3`.
         patterns:
           - 'rx-nostr'
           - '@rx-nostr/*'
+          - 'rxjs'
+          - 'nostr-tools'
+          - 'nostr-typedef'
+          - 'zod'
+          - 'zod-nostr'
       svelte:
-        # @sveltejs/*, @skeletonlabs/* and svelte-check all declare peers on
-        # svelte, and @sveltejs/vite-plugin-svelte pins the vite major.
+        # @sveltejs/vite-plugin-svelte peers svelte `^5.46.4` and vite `^8.0.0`,
+        # both a single major, so those three move together; @sveltejs/kit peers
+        # all of them. svelte-check, @skeletonlabs/skeleton-svelte and
+        # @testing-library/svelte each peer svelte over a range that ends at the
+        # current major.
         patterns:
           - 'svelte'
           - 'svelte-check'
           - '@sveltejs/*'
-          - '@skeletonlabs/*'
+          - '@skeletonlabs/skeleton-svelte'
+          - '@testing-library/svelte'
           - 'vite'
       tailwind:
+        # @tailwindcss/* ships in lockstep with tailwindcss, and
+        # @skeletonlabs/skeleton peers `tailwindcss ^4.0.0` -- its only peer, so
+        # it belongs here rather than with the rest of the Skeleton scope.
         patterns:
           - 'tailwindcss'
           - '@tailwindcss/*'
+          - '@skeletonlabs/skeleton'
       vitest:
-        # @testing-library/jest-dom augments vitest's own `Assertion` type and
-        # vitest-websocket-mock declares a vitest peer, so a vitest major has
-        # to move together with them.
+        # @testing-library/jest-dom augments vitest's own `Assertion` interface,
+        # so a vitest major that changes its shape needs a matching jest-dom
+        # (testing-library/jest-dom#738), and vitest-websocket-mock@0.8.0 peers
+        # `vitest >=5 <6`. @testing-library/svelte is deliberately not here: its
+        # vitest peer is `*`, and svelte is what actually constrains it.
         patterns:
           - 'vitest'
           - '@vitest/*'
           - 'vitest-websocket-mock'
-          - '@testing-library/*'
-      zod:
-        # zod-nostr declares a peer on zod.
-        patterns:
-          - 'zod'
-          - 'zod-nostr'
+          - '@testing-library/jest-dom'
