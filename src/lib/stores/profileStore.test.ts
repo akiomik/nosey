@@ -1,8 +1,39 @@
+import { HttpResponse, http } from 'msw';
+import { setupServer } from 'msw/node';
 import { type EventTemplate, finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { get } from 'svelte/store';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import WS from 'vitest-websocket-mock';
 import { profileStore } from './profileStore';
+
+// `vitest-websocket-mock` only mocks the WebSocket side. rx-nostr separately
+// fetches each relay's NIP-11 document over plain HTTPS and blocks the REQ on
+// the answer, so without these handlers the tests reach the real relays and
+// hang for as long as those hosts take to reply -- see issue #406. An empty
+// document leaves `limitation.max_subscriptions` undefined, which is how
+// rx-nostr behaves against a relay that serves no NIP-11 anyway.
+const server = setupServer(
+  ...['https://relay.damus.io/', 'https://nos.lol/', 'https://yabu.me/'].map((url) =>
+    http.get(url, () => HttpResponse.json({}))
+  )
+);
+
+// `error` keeps any request this file does not stub from reaching the network.
+// rx-nostr swallows a failed NIP-11 fetch, so adding a relay without a handler
+// stays green rather than erroring -- but it stays offline and fast, which is
+// what matters here.
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' });
+  // msw also intercepts WebSocket, installing a read-only global that
+  // mock-socket (behind `vitest-websocket-mock`) then fails to overwrite.
+  // Only HTTP interception is wanted here, so hand the global back.
+  Object.defineProperty(globalThis, 'WebSocket', {
+    value: globalThis.WebSocket,
+    writable: true,
+    configurable: true,
+  });
+});
+afterAll(() => server.close());
 
 afterEach(() => {
   WS.clean();
@@ -44,7 +75,7 @@ describe('profileStore', () => {
     });
 
     unsubscribe();
-  }, 15000);
+  });
 
   it('ends up with the newest event when relays disagree on the profile version', async () => {
     const [relayA, relayB, relayC] = [
@@ -89,5 +120,5 @@ describe('profileStore', () => {
     });
 
     unsubscribe();
-  }, 15000);
+  });
 });
