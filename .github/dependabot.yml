@@ -9,7 +9,50 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
+    # Packages that constrain each other through peer dependencies are updated
+    # in one pull request, so a bump that only works alongside its siblings is
+    # never proposed on its own. Packages with no such constraint are left
+    # ungrouped, so an update that turns out to be unmergeable holds up only
+    # itself. Groups cover version updates only; security updates stay
+    # ungrouped so a fix is never blocked by an unrelated one.
     groups:
       fortawesome:
         patterns:
           - '@fortawesome/*'
+      linkify:
+        # linkify-html and linkify-plugin-mention pin linkifyjs exactly.
+        patterns:
+          - 'linkifyjs'
+          - 'linkify-*'
+      rx-nostr:
+        # @rx-nostr/crypto declares a `~3` peer on rx-nostr.
+        patterns:
+          - 'rx-nostr'
+          - '@rx-nostr/*'
+      svelte:
+        # @sveltejs/*, @skeletonlabs/* and svelte-check all declare peers on
+        # svelte, and @sveltejs/vite-plugin-svelte pins the vite major.
+        patterns:
+          - 'svelte'
+          - 'svelte-check'
+          - '@sveltejs/*'
+          - '@skeletonlabs/*'
+          - 'vite'
+      tailwind:
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/*'
+      vitest:
+        # @testing-library/jest-dom augments vitest's own `Assertion` type and
+        # vitest-websocket-mock declares a vitest peer, so a vitest major has
+        # to move together with them.
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+          - 'vitest-websocket-mock'
+          - '@testing-library/*'
+      zod:
+        # zod-nostr declares a peer on zod.
+        patterns:
+          - 'zod'
+          - 'zod-nostr'
