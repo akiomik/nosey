@@ -9,55 +9,43 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
-    # Dependencies that constrain each other are updated in one pull request, so
-    # a bump that only works alongside its siblings is never proposed on its
-    # own. The line is drawn at the tight constraints -- an exact pin, a
-    # single-major peer range, a lockstep release train, or a type or stylesheet
-    # that has to resolve to one copy -- and not at the loose ones, where a
-    # package can lag a release without breaking.
+    # Related dependencies are updated in one pull request, so a bump that only
+    # works alongside its siblings is never proposed on its own. A package is
+    # grouped when something else in the manifest cannot move without it: a pin
+    # to another package's exact version, a shared monorepo release line, or a
+    # type or stylesheet that has to resolve to a single copy. Everything else
+    # is updated on its own, so an unmergeable update holds up only itself.
     #
-    # Anything not named below is updated on its own, so an update that turns
-    # out to be unmergeable holds up only itself. Groups cover version updates;
-    # security updates stay ungrouped so a fix is never blocked by an unrelated
-    # one.
+    # The graph is not a forest, so some of those ties necessarily cross a group
+    # boundary. The svelte group owns `vite`, which vitest both depends on and
+    # peers and which @tailwindcss/vite peers; @testing-library/jest-dom and
+    # @testing-library/svelte sit in different groups and share
+    # @testing-library/dom; Skeleton peers svelte and tailwindcss from a group
+    # of its own. When a major lands on the far side of one of these, the group
+    # pull request holding the other end stays blocked until both sides catch
+    # up. That is the price of not collapsing svelte, tailwind, skeleton and
+    # vitest into one group, where a single bad member blocks all the rest.
     #
-    # Three tight edges are left crossing a group boundary on purpose, because
-    # closing them would leave one group holding most of the dev tree:
-    #
-    #   - `vite` sits in the svelte group, but `vitest` peers it at
-    #     `^6 || ^7 || ^8` and `@tailwindcss/vite` at `^5.2.0 || ^6 || ^7 || ^8`.
-    #   - `@testing-library/jest-dom` peers `@testing-library/dom` at
-    #     `>=10 <11`, while `@testing-library/svelte` depends on it at
-    #     `9.x.x || 10.x.x` from the svelte group.
-    #   - `@skeletonlabs/*` peers `tailwindcss ^4.0.0` and `svelte ^5.40.0`.
-    #     Skeleton ships support for a framework major after that major lands,
-    #     so this edge cannot be closed by ordering -- grouping Skeleton with
-    #     either framework would park that framework behind Skeleton.
-    #
-    # When a major does land on the far side of one of these, the group pull
-    # request holding the other end is blocked until both sides catch up. That
-    # is a real cost, not a follow-up commit, and it is the reason the cuts are
-    # placed at the widest peer ranges rather than the narrowest.
+    # Groups cover version updates. Security updates stay ungrouped, so a fix is
+    # never blocked by an unrelated one.
     groups:
       fortawesome:
-        # The icon packages and the core ship in lockstep. The svelte peer on
-        # @fortawesome/svelte-fontawesome is a loose `~3 || ~4 || ~5`, so it
-        # stays here rather than with svelte.
+        # One release line. @fortawesome/svelte-fontawesome peers svelte too,
+        # but its lockstep with the icon packages is the stronger tie.
         patterns:
           - '@fortawesome/*'
       linkify:
-        # linkify-html and linkify-plugin-mention pin linkifyjs exactly
-        # (`==4.3.3`).
+        # linkify-html and linkify-plugin-mention peer linkifyjs at its own
+        # exact version, re-pinned every release.
         patterns:
           - 'linkifyjs'
           - 'linkify-*'
       nostr:
-        # These carry each other's types across the API boundary, so each has to
-        # resolve to one copy: rx-nostr and @rx-nostr/crypto both depend on
-        # nostr-typedef and rx-nostr on rxjs, while zod-nostr depends on
-        # nostr-tools and peers zod. Bumping one alone installs a second copy
-        # beside the old one, and TypeScript treats the two as unrelated types.
-        # @rx-nostr/crypto also peers rx-nostr at `~3`.
+        # These hand each other's types across the API boundary -- rx-nostr and
+        # @rx-nostr/crypto over nostr-typedef and rxjs, zod-nostr over
+        # nostr-tools and zod -- so each has to resolve to one copy. Bumping one
+        # alone installs a second beside the old one, and TypeScript treats the
+        # two as unrelated. @rx-nostr/crypto also peers rx-nostr.
         patterns:
           - 'rx-nostr'
           - '@rx-nostr/*'
@@ -68,19 +56,18 @@ updates:
           - 'zod-nostr'
       skeleton:
         # One monorepo on one version line, and skeleton-svelte pins
-        # @skeletonlabs/skeleton-common exactly. src/app.css imports both, and
-        # the components' markup is written against the core package's classes
-        # and design tokens -- a coupling no peer range declares, so half of
-        # Skeleton on v5 and half on v6 breaks the styling with a clean install.
+        # @skeletonlabs/skeleton-common to its own version. src/app.css imports
+        # both packages and the components' markup is written against the core
+        # package's classes and design tokens -- a coupling no peer range
+        # declares, so half a Skeleton release is broken styling.
         patterns:
           - '@skeletonlabs/*'
       svelte:
-        # @sveltejs/vite-plugin-svelte peers svelte `^5.46.4` and vite `^8.0.0`,
-        # both a single major, so those three move together; @sveltejs/kit peers
-        # all of them. svelte-check and @testing-library/svelte each peer svelte
-        # over a range that ends at the current major -- for
-        # @testing-library/svelte that is the real constraint, since its vitest
-        # peer is `*`.
+        # @sveltejs/vite-plugin-svelte peers svelte and vite at one major each,
+        # so those three move together, and @sveltejs/kit peers all of them.
+        # svelte-check and @testing-library/svelte peer svelte over ranges that
+        # stop at the current major; for @testing-library/svelte that is the
+        # binding constraint, since its vitest peer is `*`.
         patterns:
           - 'svelte'
           - 'svelte-check'
@@ -88,19 +75,25 @@ updates:
           - '@testing-library/svelte'
           - 'vite'
       tailwind:
-        # @tailwindcss/vite depends on tailwindcss at an exact version
-        # (`4.3.3`), so the two ship together. @tailwindcss/forms is not in the
-        # group: it is versioned independently (`0.5.x`) and peers
-        # `tailwindcss >=3.0.0`, so grouping it would only let a blocked
-        # tailwindcss bump hold up its patches.
+        # @tailwindcss/vite depends on the identical tailwindcss version.
+        # @tailwindcss/forms is deliberately absent: it is versioned
+        # independently and peers tailwindcss over the widest range in this
+        # manifest, so grouping it would only let a blocked tailwindcss bump
+        # hold up its patches.
         patterns:
           - 'tailwindcss'
           - '@tailwindcss/vite'
       vitest:
         # @testing-library/jest-dom augments vitest's own `Assertion` interface,
-        # so a vitest major that changes its shape needs a matching jest-dom
-        # (testing-library/jest-dom#738), and vitest-websocket-mock@0.8.0 peers
-        # `vitest >=5 <6`.
+        # so a vitest major that reshapes it needs a matching jest-dom, and
+        # vitest-websocket-mock's current line peers a single vitest major.
+        #
+        # This binds both ways: while vitest 5 and jest-dom are incompatible
+        # (testing-library/jest-dom#738), this group's pull request stays red
+        # and a jest-dom release cannot land ahead of it. That is the group
+        # working as intended -- the test stack moves as a unit or not at all --
+        # but it is worth knowing before wondering why a jest-dom patch is
+        # sitting in a failing pull request.
         patterns:
           - 'vitest'
           - '@vitest/*'
