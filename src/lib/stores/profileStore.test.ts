@@ -1,8 +1,45 @@
+import { HttpResponse, http } from 'msw';
+import { setupServer } from 'msw/node';
 import { type EventTemplate, finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { get } from 'svelte/store';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import WS from 'vitest-websocket-mock';
 import { profileStore } from './profileStore';
+
+// `vitest-websocket-mock` only mocks the WebSocket side. rx-nostr separately
+// fetches each relay's NIP-11 document over plain HTTPS and blocks the REQ on
+// the answer, so without msw the tests reach the real relays and hang for as
+// long as those hosts take to reply -- see issue #406.
+//
+// The handlers name the three documents rx-nostr asks for and answer with an
+// empty one, which leaves `limitation.max_subscriptions` undefined -- how
+// rx-nostr treats a relay serving no NIP-11 anyway. They document the traffic
+// rather than hold it back: `onUnhandledRequest: 'error'` is what keeps a
+// request off the network, and `fetchRelayInfo` turns any failure into that
+// same empty document. So a relay added to `profileStore.ts` without a handler
+// here stays offline and fast, just undocumented.
+const server = setupServer(
+  ...['https://relay.damus.io/', 'https://nos.lol/', 'https://yabu.me/'].map((url) =>
+    http.get(url, () => HttpResponse.json({}))
+  )
+);
+
+// msw also intercepts WebSocket, replacing jsdom's accessor with a read-only
+// data property that mock-socket (behind `vitest-websocket-mock`) then fails
+// to assign over. Only HTTP interception is wanted here, so take a copy of the
+// descriptor msw is about to overwrite and put it back once msw has started.
+// Restoring the accessor itself, rather than a stand-in, leaves mock-socket
+// assigning through the same setter it uses when msw is not involved.
+const nativeWebSocket = Object.getOwnPropertyDescriptor(globalThis, 'WebSocket');
+if (!nativeWebSocket) {
+  throw new Error('expected the test environment to define a WebSocket global');
+}
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' });
+  Object.defineProperty(globalThis, 'WebSocket', nativeWebSocket);
+});
+afterAll(() => server.close());
 
 afterEach(() => {
   WS.clean();
@@ -44,7 +81,7 @@ describe('profileStore', () => {
     });
 
     unsubscribe();
-  }, 15000);
+  });
 
   it('ends up with the newest event when relays disagree on the profile version', async () => {
     const [relayA, relayB, relayC] = [
@@ -89,5 +126,5 @@ describe('profileStore', () => {
     });
 
     unsubscribe();
-  }, 15000);
+  });
 });
