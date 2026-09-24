@@ -13,7 +13,7 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
-    "types": ["@testing-library/jest-dom"]
+    "types": ["@testing-library/jest-dom/vitest"]
   }
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
   //
