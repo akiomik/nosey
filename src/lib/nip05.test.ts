@@ -1,13 +1,16 @@
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { verifyNip05 } from './nip05';
+
+// Exercise browser behavior without enabling browser dependency exports.
+vi.mock('$app/environment', () => ({ browser: true }));
 
 const server = setupServer();
 
 const pubkey = 'a'.repeat(64);
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
