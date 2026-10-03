@@ -22,7 +22,7 @@ const signedEvent = (content = 'hello') =>
 
 const result = (data: SearchResult['data'] = []): SearchResult => ({ data, pagination });
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
