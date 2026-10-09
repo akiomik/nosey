@@ -2,7 +2,7 @@ import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { finalizeEvent, generateSecretKey } from 'nostr-tools/pure';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { HttpBadGatewayError, HttpBadRequestError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError } from '#lib/errors.ts';
 import { SearchApiParamsSchema, search } from './api';
 import type { SearchResult } from './result';
 

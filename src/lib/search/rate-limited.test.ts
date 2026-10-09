@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { HttpTooManyRequestsError } from '$lib/errors';
+import { HttpTooManyRequestsError } from '#lib/errors.ts';
 import { createRateLimitedSearch } from './rate-limited';
 import type { SearchResult } from './result';
 

@@ -3,7 +3,7 @@ import type * as Nostr from 'nostr-typedef';
 import { createRxNostr, createRxOneshotReq, filterBy, latestEach, verify } from 'rx-nostr';
 import { map } from 'rxjs';
 import { type Readable, readable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export const profileStore = (pubkeys: string[]): Readable<Record<string, Nostr.Event>> => {
   if (!browser) {

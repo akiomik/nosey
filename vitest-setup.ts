@@ -20,4 +20,4 @@ globalThis.ResizeObserver ??= ResizeObserverStub;
 HTMLCanvasElement.prototype.getContext = (() => ({
   font: '',
   measureText: (text: string) => ({ width: text.length }),
-})) as typeof HTMLCanvasElement.prototype.getContext;
+})) as unknown as typeof HTMLCanvasElement.prototype.getContext;

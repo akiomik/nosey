@@ -1,9 +1,9 @@
 import { nip19 } from 'nostr-tools';
 import { mount, unmount } from 'svelte';
-import { browser } from '$app/environment';
-import MentionMenu from '$lib/components/MentionMenu.svelte';
-import type { MentionItem } from '$lib/mention';
-import { profileSuggestions } from '$lib/stores/profileSuggestions';
+import MentionMenu from '#lib/components/MentionMenu.svelte';
+import type { MentionItem } from '#lib/mention.ts';
+import { profileSuggestions } from '#lib/stores/profileSuggestions.ts';
+import { browser } from '$app/env';
 
 // This intentionally hand-rolls keyboard navigation instead of using
 // @skeletonlabs/skeleton-svelte's `Menu` or `Combobox` (both wrap @zag-js

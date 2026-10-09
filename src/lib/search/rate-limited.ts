@@ -1,4 +1,4 @@
-import { HttpTooManyRequestsError } from '$lib/errors';
+import { HttpTooManyRequestsError } from '#lib/errors.ts';
 import { search } from './api';
 import type { SearchApiRequest } from './request';
 import type { SearchResult } from './result';

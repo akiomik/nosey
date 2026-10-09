@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { jsonLdTag } from '$lib/helpers/jsonLdTag';
+  import { jsonLdTag } from '#lib/helpers/jsonLdTag.ts';
 
   interface Props {
     jsonLd: object;

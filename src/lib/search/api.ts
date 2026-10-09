@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
+import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '#lib/errors.ts';
 import { type SearchApiRequest, SearchApiRequestSchema } from './request';
 import { type SearchResult, SearchResultSchema } from './result';
 

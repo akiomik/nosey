@@ -4,7 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { verifyNip05 } from './nip05';
 
 // Exercise browser behavior without enabling browser dependency exports.
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 
 const server = setupServer();
 

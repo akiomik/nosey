@@ -1,10 +1,10 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { nip19 } from 'nostr-tools';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { copyToClipboardWithToast } from '$lib/helpers/copyToClipboardWithToast';
+import { copyToClipboardWithToast } from '#lib/helpers/copyToClipboardWithToast.ts';
 import NoteListItemMenu from './NoteListItemMenu.svelte';
 
-vi.mock('$lib/helpers/copyToClipboardWithToast', () => ({
+vi.mock('#lib/helpers/copyToClipboardWithToast.ts', () => ({
   copyToClipboardWithToast: vi.fn(),
 }));
 

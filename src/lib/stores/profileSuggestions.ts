@@ -12,11 +12,11 @@ import {
   timer,
 } from 'rxjs';
 import { type Readable, writable } from 'svelte/store';
-import { HttpTooManyRequestsError } from '$lib/errors';
-import { type MentionItem, MentionItemSchema } from '$lib/mention';
-import { rateLimitedSearch } from '$lib/search/rate-limited';
-import { createProfileSuggestionRequest } from '$lib/search/request';
-import type { SearchResult } from '$lib/search/result';
+import { HttpTooManyRequestsError } from '#lib/errors.ts';
+import { type MentionItem, MentionItemSchema } from '#lib/mention.ts';
+import { rateLimitedSearch } from '#lib/search/rate-limited.ts';
+import { createProfileSuggestionRequest } from '#lib/search/request.ts';
+import type { SearchResult } from '#lib/search/result.ts';
 
 const MENU_ITEM_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 250;

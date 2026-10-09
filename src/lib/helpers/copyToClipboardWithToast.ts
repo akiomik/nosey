@@ -1,5 +1,5 @@
-import { copyToClipboard } from '$lib/helpers/copyToClipboard';
-import { toaster } from '$lib/stores/toaster';
+import { copyToClipboard } from '#lib/helpers/copyToClipboard.ts';
+import { toaster } from '#lib/stores/toaster.ts';
 
 export const copyToClipboardWithToast = async (text: string, label: string): Promise<void> => {
   try {

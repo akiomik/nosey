@@ -1,6 +1,6 @@
 <script>
+  import Alert from '#lib/components/Alert.svelte';
   import { page } from '$app/state';
-  import Alert from '$lib/components/Alert.svelte';
 </script>
 
 <Alert variant="error">

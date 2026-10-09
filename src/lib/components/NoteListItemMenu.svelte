@@ -4,7 +4,7 @@
   import { Menu, Portal } from '@skeletonlabs/skeleton-svelte';
   import { nip19 } from 'nostr-tools';
   import type * as Nostr from 'nostr-typedef';
-  import { copyToClipboardWithToast } from '$lib/helpers/copyToClipboardWithToast';
+  import { copyToClipboardWithToast } from '#lib/helpers/copyToClipboardWithToast.ts';
 
   interface Props {
     note: Nostr.Event;

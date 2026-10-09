@@ -7,7 +7,7 @@ import WS from 'vitest-websocket-mock';
 import { profileStore } from './profileStore';
 
 // Exercise browser behavior without enabling browser dependency exports.
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 
 // `vitest-websocket-mock` only mocks the WebSocket side. rx-nostr separately
 // fetches each relay's NIP-11 document over plain HTTPS and blocks the REQ on
