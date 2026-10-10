@@ -1,6 +1,6 @@
-import type { SearchResult } from '$lib/search/result';
+import type { SearchResult } from '#lib/search/result.ts';
 
-export type { SearchResult, SearchResultPagination } from '$lib/search/result';
+export type { SearchResult, SearchResultPagination } from '#lib/search/result.ts';
 
 export type PageData = {
   q: string;

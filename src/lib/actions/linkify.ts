@@ -2,7 +2,7 @@ import linkifyHtml from 'linkify-html';
 import 'linkify-plugin-mention';
 // import type { Action } from 'svelte/runtime/action/public';
 import type { Opts } from 'linkifyjs';
-import { shortenNostrId } from '$lib/nostr';
+import { shortenNostrId } from '#lib/nostr.ts';
 
 export const linkifyOpts = {
   className: 'underline',

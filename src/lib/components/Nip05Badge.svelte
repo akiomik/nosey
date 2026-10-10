@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { splitIdentifier, verifyNip05 } from '$lib/nip05';
+  import { splitIdentifier, verifyNip05 } from '#lib/nip05.ts';
 
   interface Props {
     pubkey: string;

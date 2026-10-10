@@ -1,10 +1,10 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { verifyNip05 } from '$lib/nip05';
+import { verifyNip05 } from '#lib/nip05.ts';
 import NoteListItem from './NoteListItem.svelte';
 
-vi.mock('$lib/nip05', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('$lib/nip05')>()),
+vi.mock('#lib/nip05.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('#lib/nip05.ts')>()),
   verifyNip05: vi.fn(),
 }));
 

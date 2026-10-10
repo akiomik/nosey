@@ -2,11 +2,11 @@
   import '../app.css';
 
   import { Toast } from '@skeletonlabs/skeleton-svelte';
+  import Footer from '#lib/components/Footer.svelte';
+  import Header from '#lib/components/Header.svelte';
+  import LoadingSpinner from '#lib/components/LoadingSpinner.svelte';
+  import { toaster } from '#lib/stores/toaster.ts';
   import { navigating } from '$app/state';
-  import Footer from '$lib/components/Footer.svelte';
-  import Header from '$lib/components/Header.svelte';
-  import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
-  import { toaster } from '$lib/stores/toaster';
 
   interface Props {
     children?: import('svelte').Snippet;

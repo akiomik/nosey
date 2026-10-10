@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { autocomplete } from '$lib/actions/autocomplete.svelte';
-  import type { SearchFilters } from '$lib/search/filters';
+  import { autocomplete } from '#lib/actions/autocomplete.svelte.ts';
+  import type { SearchFilters } from '#lib/search/filters.ts';
   import { type AdvancedSearchFormData, AdvancedSearchFormSchema } from './AdvancedSearchModal.form';
 
   interface Props {

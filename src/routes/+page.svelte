@@ -3,14 +3,13 @@
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { Pagination } from '@skeletonlabs/skeleton-svelte';
   import { untrack } from 'svelte';
-
+  import { autocomplete } from '#lib/actions/autocomplete.svelte.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import JsonLd from '#lib/components/JsonLd.svelte';
+  import NoteList from '#lib/components/NoteList.svelte';
+  import { createSearchPageSeo } from '#lib/seo.ts';
+  import type { PageData } from '#lib/types.ts';
   import { goto } from '$app/navigation';
-  import { autocomplete } from '$lib/actions/autocomplete.svelte';
-  import Alert from '$lib/components/Alert.svelte';
-  import JsonLd from '$lib/components/JsonLd.svelte';
-  import NoteList from '$lib/components/NoteList.svelte';
-  import { createSearchPageSeo } from '$lib/seo';
-  import type { PageData } from '$lib/types';
 
   interface Props {
     data: PageData;

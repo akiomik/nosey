@@ -1,13 +1,13 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import type { MentionItem } from '$lib/mention';
+import type { MentionItem } from '#lib/mention.ts';
 import MentionMenu from './MentionMenu.svelte';
 
 // Nip05Badge fetches over the network to verify NIP-05 identifiers; stub out
 // verifyNip05 so these tests stay hermetic and only exercise the menu itself,
 // while keeping the real splitIdentifier for the badge's tooltip text.
-vi.mock('$lib/nip05', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('$lib/nip05')>()),
+vi.mock('#lib/nip05.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('#lib/nip05.ts')>()),
   verifyNip05: vi.fn(() => new Promise(() => {})),
 }));
 

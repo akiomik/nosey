@@ -2,12 +2,15 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { nip19 } from 'nostr-tools';
 import { writable } from 'svelte/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MentionItem } from '$lib/mention';
-import type { ProfileSuggestions, ProfileSuggestionsState } from '$lib/stores/profileSuggestions';
+import type { MentionItem } from '#lib/mention.ts';
+import type {
+  ProfileSuggestions,
+  ProfileSuggestionsState,
+} from '#lib/stores/profileSuggestions.ts';
 
 const { profileSuggestionsMock } = vi.hoisted(() => ({ profileSuggestionsMock: vi.fn() }));
 
-vi.mock('$lib/stores/profileSuggestions', () => ({
+vi.mock('#lib/stores/profileSuggestions.ts', () => ({
   profileSuggestions: profileSuggestionsMock,
 }));
 

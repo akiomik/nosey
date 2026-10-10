@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usePopover } from '@skeletonlabs/skeleton-svelte';
-  import type { MentionItem } from '$lib/mention';
-  import { resolveDisplayName, resolveNip05Display } from '$lib/profile';
+  import type { MentionItem } from '#lib/mention.ts';
+  import { resolveDisplayName, resolveNip05Display } from '#lib/profile.ts';
   import Nip05Badge from './Nip05Badge.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';
 

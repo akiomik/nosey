@@ -1,5 +1,5 @@
 import { zostr } from 'zod-nostr';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 const VERIFY_TIMEOUT_MS = 5_000;
 

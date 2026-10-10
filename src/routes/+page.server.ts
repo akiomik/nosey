@@ -1,11 +1,11 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
-import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '$lib/errors';
-import { search } from '$lib/search/api';
-import { hasSearchFilter } from '$lib/search/filters';
-import { createNoteSearchRequest } from '$lib/search/request';
-import { searchTextCodec } from '$lib/search/text';
-import { SearchUrlSchema } from '$lib/search/url';
+import { HttpBadGatewayError, HttpBadRequestError, HttpTooManyRequestsError } from '#lib/errors.ts';
+import { search } from '#lib/search/api.ts';
+import { hasSearchFilter } from '#lib/search/filters.ts';
+import { createNoteSearchRequest } from '#lib/search/request.ts';
+import { searchTextCodec } from '#lib/search/text.ts';
+import { SearchUrlSchema } from '#lib/search/url.ts';
 
 export async function load({ url }: RequestEvent) {
   const parsedUrl = SearchUrlSchema.safeParse({

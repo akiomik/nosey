@@ -1,8 +1,8 @@
 <script lang="ts">
   import type * as Nostr from 'nostr-typedef';
-  import Alert from '$lib/components/Alert.svelte';
-  import NoteListItem from '$lib/components/NoteListItem.svelte';
-  import { profileStore } from '$lib/stores/profileStore';
+  import Alert from '#lib/components/Alert.svelte';
+  import NoteListItem from '#lib/components/NoteListItem.svelte';
+  import { profileStore } from '#lib/stores/profileStore.ts';
 
   interface Props {
     notes: Nostr.Event[];

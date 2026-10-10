@@ -2,9 +2,9 @@
   import { faBars, faSearch } from '@fortawesome/free-solid-svg-icons';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { Dialog, Menu, Portal } from '@skeletonlabs/skeleton-svelte';
+  import type { SearchFilters } from '#lib/search/filters.ts';
+  import { searchTextCodec } from '#lib/search/text.ts';
   import { goto } from '$app/navigation';
-  import type { SearchFilters } from '$lib/search/filters';
-  import { searchTextCodec } from '$lib/search/text';
   import AdvancedSearchModal from './AdvancedSearchModal.svelte';
 
   let isMenuOpen = $state(false);

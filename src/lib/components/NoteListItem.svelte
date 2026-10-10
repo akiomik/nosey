@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Collapsible } from '@skeletonlabs/skeleton-svelte';
   import type * as Nostr from 'nostr-typedef';
-  import { inlineImage } from '$lib/actions/inlineImage';
-  import { linkify, linkifyOpts } from '$lib/actions/linkify';
-  import { hasInlineImageUrl, isNoteContentDefinitelyLong, transformNoteContent } from '$lib/note';
-  import { resolveDisplayName, resolveIdentifiedProfile, resolveNip05Display } from '$lib/profile';
+  import { inlineImage } from '#lib/actions/inlineImage.ts';
+  import { linkify, linkifyOpts } from '#lib/actions/linkify.ts';
+  import { hasInlineImageUrl, isNoteContentDefinitelyLong, transformNoteContent } from '#lib/note.ts';
+  import { resolveDisplayName, resolveIdentifiedProfile, resolveNip05Display } from '#lib/profile.ts';
   import Nip05Badge from './Nip05Badge.svelte';
   import NoteListItemMenu from './NoteListItemMenu.svelte';
   import ProfileAvatar from './ProfileAvatar.svelte';

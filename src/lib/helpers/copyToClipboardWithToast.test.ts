@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { copyToClipboard } = vi.hoisted(() => ({ copyToClipboard: vi.fn() }));
 const { toaster } = vi.hoisted(() => ({ toaster: { create: vi.fn() } }));
 
-vi.mock('$lib/helpers/copyToClipboard', () => ({ copyToClipboard }));
-vi.mock('$lib/stores/toaster', () => ({ toaster }));
+vi.mock('#lib/helpers/copyToClipboard.ts', () => ({ copyToClipboard }));
+vi.mock('#lib/stores/toaster.ts', () => ({ toaster }));
 
 const { copyToClipboardWithToast } = await import('./copyToClipboardWithToast');
 
