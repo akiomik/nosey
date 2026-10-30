@@ -75,7 +75,7 @@
 <div {...popover().getPositionerProps()}>
   <div
     {...popover().getContentProps()}
-    class="card preset-tonal-surface p-4 z-[300] mt-2 shadow max-w-[min(20rem,var(--available-width,20rem))] max-h-[var(--available-height,50vh)] overflow-y-auto"
+    class="card preset-tonal-surface z-[300] mt-2 max-h-[var(--available-height,50vh)] max-w-[min(20rem,var(--available-width,20rem))] overflow-y-auto p-4 shadow"
   >
     {#if loading}
       <p class="px-3 py-1.5 opacity-60">Searching...</p>
@@ -98,11 +98,11 @@
               <ProfileAvatar
                 picture={item.profile.picture}
                 name={resolveDisplayName(item)}
-                class="w-6 h-6 shrink-0"
+                class="h-6 w-6 shrink-0"
               />
               <span class="min-w-0 truncate">{resolveDisplayName(item)}</span>
               {#if item.profile.nip05}
-                <span class="min-w-0 shrink-[999] truncate flex items-center gap-1">
+                <span class="flex min-w-0 shrink-[999] items-center gap-1 truncate">
                   <code class="truncate">{resolveNip05Display(item)}</code>
                   <Nip05Badge pubkey={item.pubkey} nip05={resolveNip05Display(item)} />
                 </span>

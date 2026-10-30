@@ -38,11 +38,11 @@
   }}
 >
   <Menu.Trigger class="btn-icon flex-none">
-    <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="w-4 h-4" />
+    <FontAwesomeIcon icon={faEllipsisVertical} title="Menu" class="h-4 w-4" />
   </Menu.Trigger>
   <Portal>
     <Menu.Positioner>
-      <Menu.Content class="card preset-tonal-surface p-2 w-64 z-20 shadow space-y-1">
+      <Menu.Content class="card preset-tonal-surface z-20 w-64 space-y-1 p-2 shadow">
         <Menu.Item
           value="copy-npub"
           onclick={() => copyToClipboardWithToast(npub, 'npub1')}

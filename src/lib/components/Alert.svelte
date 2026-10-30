@@ -19,7 +19,7 @@
   });
 </script>
 
-<aside class={`card p-4 flex gap-2 items-center ${className}`}>
+<aside class={`card flex items-center gap-2 p-4 ${className}`}>
   {@render icon?.()}
 
   <div class="flex-1">

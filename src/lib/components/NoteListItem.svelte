@@ -81,15 +81,15 @@
 
 <div class="card preset-tonal-surface">
   <div class="p-4">
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <div class="mr-2 flex-none">
         <ProfileAvatar picture={identified.profile.picture} name={nameOrPubkey} />
       </div>
 
-      <p class="flex-auto min-w-0 flex items-center gap-1">
-        <span class="font-bold truncate min-w-0">{nameOrPubkey}</span>
+      <p class="flex min-w-0 flex-auto items-center gap-1">
+        <span class="min-w-0 truncate font-bold">{nameOrPubkey}</span>
         {#if identified.profile.nip05}
-          <span class="min-w-0 flex-1 truncate flex items-center gap-1">
+          <span class="flex min-w-0 flex-1 items-center gap-1 truncate">
             <code class="truncate overflow-x-hidden!">{resolveNip05Display(identified)}</code>
             <Nip05Badge pubkey={note.pubkey} nip05={resolveNip05Display(identified)} />
           </span>

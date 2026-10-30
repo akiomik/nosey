@@ -49,10 +49,10 @@
   };
 </script>
 
-<div class="card preset-tonal-surface p-4 w-full max-w-md shadow-xl space-y-4">
+<div class="card preset-tonal-surface w-full max-w-md space-y-4 p-4 shadow-xl">
   <header class="text-2xl font-bold">Advanced search</header>
 
-  <form class="p-4 space-y-4 rounded-container" onsubmit={handleFormSubmit}>
+  <form class="rounded-container space-y-4 p-4" onsubmit={handleFormSubmit}>
     <label class="label">
       <span>Keywords</span>
       <input

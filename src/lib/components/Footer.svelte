@@ -6,17 +6,17 @@
   import FooterItem from '#lib/components/FooterItem.svelte';
 </script>
 
-<div class="p-8 flex justify-center">
+<div class="flex justify-center p-8">
   <ul class="list-none">
     <FooterItem>&copy; 2023 nosey</FooterItem>
     <FooterItem>
       <ExternalLink href="https://github.com/akiomik/nosey" class="unstyled">
-        <FontAwesomeIcon icon={faGithub} title="Open our Github repository" class="w-4 inline" />
+        <FontAwesomeIcon icon={faGithub} title="Open our Github repository" class="inline w-4" />
       </ExternalLink>
     </FooterItem>
     <FooterItem last={true}>
       <ExternalLink href="lightning:akiomik@stacker.news" class="unstyled">
-        <FontAwesomeIcon icon={faBolt} title="Open our Lightning Address" class="w-4 inline" />
+        <FontAwesomeIcon icon={faBolt} title="Open our Lightning Address" class="inline w-4" />
       </ExternalLink>
     </FooterItem>
   </ul>
