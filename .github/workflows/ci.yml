@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
-          cache: 'npm'
+          node-version-file: ".node-version"
+          cache: "npm"
       - run: npm ci
       - run: npm run lint
       - run: npm run check

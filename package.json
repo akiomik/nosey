@@ -18,7 +18,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.13",
+    "@biomejs/biome": "^2.6.3",
     "@skeletonlabs/skeleton": "^5.0.1",
     "@skeletonlabs/skeleton-svelte": "^5.0.1",
     "@sveltejs/adapter-auto": "^8.0.0",

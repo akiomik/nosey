@@ -26,21 +26,21 @@
   };
 </script>
 
-<div class="min-h-svh flex flex-col">
+<div class="flex min-h-svh flex-col">
   <header>
     <Header />
   </header>
 
   {#if navigating.to}
     <div class="fixed inset-0 z-[15] bg-black opacity-60">
-      <div class="flex justify-center items-center w-full h-full">
+      <div class="flex h-full w-full items-center justify-center">
         <LoadingSpinner />
       </div>
     </div>
   {/if}
 
-  <main class="flex-1 flex flex-col">
-    <div class="container mx-auto max-w-4xl p-4 space-y-8 mt-4 flex-1 flex flex-col">
+  <main class="flex flex-1 flex-col">
+    <div class="container mx-auto mt-4 flex max-w-4xl flex-1 flex-col space-y-8 p-4">
       {@render children?.()}
     </div>
   </main>

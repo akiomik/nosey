@@ -27,13 +27,13 @@
   </Menu.Trigger>
   <Portal>
     <Menu.Positioner>
-      <Menu.Content class="card preset-tonal-surface p-2 w-52 z-20 shadow space-y-1">
+      <Menu.Content class="card preset-tonal-surface z-20 w-52 space-y-1 p-2 shadow">
         <Menu.Item
           value="advanced-search"
           onclick={() => (isAdvancedSearchOpen = true)}
-          class="block w-full text-left rounded-base px-3 py-1.5 hover:preset-tonal"
+          class="rounded-base hover:preset-tonal block w-full px-3 py-1.5 text-left"
         >
-          <FontAwesomeIcon icon={faSearch} title="Open menu" class="w-4 inline mr-2" />
+          <FontAwesomeIcon icon={faSearch} title="Open menu" class="mr-2 inline w-4" />
           Advanced search
         </Menu.Item>
       </Menu.Content>
@@ -42,9 +42,9 @@
 
   <Dialog open={isAdvancedSearchOpen} onOpenChange={(d) => (isAdvancedSearchOpen = d.open)}>
     <Portal>
-      <Dialog.Backdrop class="fixed inset-0 z-50 bg-surface-50-950/50" />
-      <Dialog.Positioner class="fixed inset-0 z-50 flex justify-center items-center">
-        <Dialog.Content class="w-full max-w-md mx-4">
+      <Dialog.Backdrop class="bg-surface-50-950/50 fixed inset-0 z-50" />
+      <Dialog.Positioner class="fixed inset-0 z-50 flex items-center justify-center">
+        <Dialog.Content class="mx-4 w-full max-w-md">
           <AdvancedSearchModal onClose={() => (isAdvancedSearchOpen = false)} onSubmit={handleSubmit} />
         </Dialog.Content>
       </Dialog.Positioner>

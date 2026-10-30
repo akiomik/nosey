@@ -69,7 +69,7 @@
 
 <form
   onsubmit={handleSearch}
-  class="flex flex-col gap-6 justify-center items-center"
+  class="flex flex-col items-center justify-center gap-6"
   class:flex-1={seo.isInitial}
 >
   {#if seo.isInitial}
@@ -90,7 +90,7 @@
         autofocus
       />
       <button type="submit" class="btn preset-filled-primary-500">
-        <FontAwesomeIcon icon={faSearch} title="Search" class="w-4 inline" />
+        <FontAwesomeIcon icon={faSearch} title="Search" class="inline w-4" />
       </button>
     </div>
   </div>
@@ -122,7 +122,7 @@
       pageSize={data.result.pagination.limit}
       page={data.page + 1}
       onPageChange={(e) => handlePage(e.page - 1)}
-      class="mx-auto w-fit max-w-full flex flex-wrap justify-center gap-1"
+      class="mx-auto flex w-fit max-w-full flex-wrap justify-center gap-1"
     >
       <Pagination.PrevTrigger class="btn-icon">&larr;</Pagination.PrevTrigger>
       <Pagination.Context>
